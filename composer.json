@@ -1,10 +1,48 @@
 {
+    "name": "craftcms/apple-news",
+    "description": "This plugin provides an Apple News integration for Craft CMS, making it possible to publish your content to iPhone and iPad owners around the world.",
+    "version": "2.0.0",
+    "type": "craft-plugin",
+    "keywords": [
+        "apple",
+        "news",
+        "applenews",
+        "cms",
+        "craftcms",
+        "yii2"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Pixel & Tonic",
+            "homepage": "https://pixelandtonic.com/"
+        }
+    ],
+    "support": {
+        "email": "support@craftcms.com",
+        "issues": "https://github.com/craftcms/apple-news/issues?state=open",
+        "source": "https://github.com/craftcms/apple-news",
+        "docs": "https://github.com/craftcms/apple-news",
+        "rss": "https://github.com/craftcms/apple-news/commits/v2.atom"
+    },
     "homepage": "http://github.com/pixelandtonic/AppleNews",
     "config": {
         "vendor-dir": "applenews/vendor"
     },
     "require": {
+        "craftcms/cms": "~3.0.0-beta.27",
         "chapter-three/apple-news-api": "dev-master",
         "league/html-to-markdown": "^4.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "craft\\applenews\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "Apple News",
+        "handle": "apple-news",
+        "changelogUrl": "https://raw.githubusercontent.com/craftcms/apple-news/v2/CHANGELOG.md",
+        "downloadUrl": "https://github.com/craftcms/apple-news/archive/v2.zip"
     }
 }

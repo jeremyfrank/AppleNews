@@ -1,13 +1,11 @@
 <?php
 
 use Craft\AppleNewsArticle;
-use Craft\BaseAppleNewsChannel;
 use Craft\AssetFileModel;
 use Craft\AppleNewsHelper;
 use Craft\DateTimeHelper;
-use Craft\IAppleNewsArticle;
+use craft\fields\data\RichTextData;
 use Craft\MatrixBlockModel;
-use Craft\RichTextData;
 
 /**
  * Class MyNewsArticle
@@ -39,20 +37,20 @@ class MyNewsArticle extends AppleNewsArticle
         // ---------------------------------------------------------------------
 
         /** @var AssetFileModel|null $featuredImage */
-        $featuredImage = $this->entry->featuredImage->first();
+        $featuredImage = Craft::$app->entry->featuredImage->first();
         $this->featuredImageUrl = $featuredImage ? $this->addFile($featuredImage) : null;
 
-        $this->byline = $this->entry->getAuthor()->getName().($this->entry->postDate ? ' | '.$this->entry->postDate->format('F j, Y') : '');
+        $this->byline = Craft::$app->entry->getAuthor()->getName().(Craft::$app->entry->postDate ? ' | '.Craft::$app->entry->postDate->format('F j, Y') : '');
 
         // Article content
         // ---------------------------------------------------------------------
 
         $this->setContent([
             'version' => '1.1',
-            'identifier' => $this->entry->id,
-            'title' => $this->entry->title,
+            'identifier' => Craft::$app->entry->id,
+            'title' => Craft::$app->entry->title,
             //'subtitle' => 'Non occidere quae cumque vi ventia',
-            'language' => AppleNewsHelper::formatLanguage($this->entry->locale),
+            'language' => AppleNewsHelper::formatLanguage(Craft::$app->getLocale()),
             'layout' => [
                 'columns' => 12,
                 'width' => 1024,
@@ -61,14 +59,14 @@ class MyNewsArticle extends AppleNewsArticle
             ],
             'metadata' => [
                 'authors' => [
-                    $this->entry->getAuthor()->getName()
+                    Craft::$app->entry->getAuthor()->getName()
                 ],
-                'canonicalURL' => $this->entry->getUrl(),
-                'dateCreated' => DateTimeHelper::toIso8601($this->entry->dateCreated),
-                'dateModified' => DateTimeHelper::toIso8601($this->entry->dateUpdated),
-                'datePublished' => ($this->entry->postDate ? DateTimeHelper::toIso8601($this->entry->postDate) : null),
-                'excerpt' => AppleNewsHelper::stripHtml($this->entry->shortDescription),
-                'keywords' => AppleNewsHelper::createKeywords($this->entry, ['shortDescription']),
+                'canonicalURL' => Craft::$app->entry->getUrl(),
+                'dateCreated' => Craft::$app->DateTimeHelper::toIso8601(Craft::$app->entry->dateCreated),
+                'dateModified' => DateTimeHelper::toIso8601(Craft::$app->entry->dateUpdated),
+                'datePublished' => Craft::$app->entry->postDate ? DateTimeHelper::toIso8601(Craft::$app->entry->postDate) : null,
+                'excerpt' => AppleNewsHelper::stripHtml(Craft::$app->entry->shortDescription),
+                'keywords' => AppleNewsHelper::createKeywords(Craft::$app->entry, ['shortDescription']),
                 'thumbnailURL' => isset($featuredImageUrl) ? $featuredImageUrl : null,
             ],
             'components' => $this->getComponents(),

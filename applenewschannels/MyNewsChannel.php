@@ -2,7 +2,6 @@
 
 use Craft\AppleNewsArticle;
 use Craft\BaseAppleNewsChannel;
-use Craft\Craft;
 use Craft\EntryModel;
 use Craft\AppleNewsHelper;
 use Craft\IAppleNewsArticle;
@@ -24,7 +23,7 @@ class MyNewsChannel extends BaseAppleNewsChannel
      */
     public function matchEntry(EntryModel $entry)
     {
-        if ($entry->locale != 'en') {
+        if (Craft::$app->getLocale() != 'en_us') {
             return false;
         }
 
@@ -32,7 +31,7 @@ class MyNewsChannel extends BaseAppleNewsChannel
             return false;
         }
 
-        if ($entry->getType()->handle != 'article') {
+        if ($entry->getType()->handle != 'news') {
             return false;
         }
 
