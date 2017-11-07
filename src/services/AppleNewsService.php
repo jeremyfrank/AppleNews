@@ -1,14 +1,19 @@
 <?php
-namespace Craft;
+namespace craft\applenews\services;
 
 use ChapterThree\AppleNewsAPI\PublisherAPI;
+use Craft;
+use craft\applenews\Plugin;
+use craft\elements\Entry;
+use yii\base\Component;
+
 
 /**
  * Class AppleNewsService
  *
  * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
  */
-class AppleNewsService extends BaseApplicationComponent
+class AppleNewsService extends Component
 {
     // Properties
     // =========================================================================
@@ -31,18 +36,11 @@ class AppleNewsService extends BaseApplicationComponent
      */
     public function init()
     {
-        // Autoload the Composer packages
-        require craft()->path->getPluginsPath().'src/vendor/autoload.php';
-
-        // Import base classes
-        Craft::import('plugins.src.IAppleNewsArticle');
-        Craft::import('plugins.src.AppleNewsArticle');
-        Craft::import('plugins.src.IAppleNewsChannel');
-        Craft::import('plugins.src.BaseAppleNewsChannel');
 
         // Set the applenewschannels alias
         defined('APPLE_NEWS_CHANELS_PATH') || define('APPLE_NEWS_CHANELS_PATH', CRAFT_BASE_PATH.'applenewschannels/');
-        Craft::setPathOfAlias('applenewschannels', APPLE_NEWS_CHANELS_PATH);
+        Craft::setAlias('applenewschannels', APPLE_NEWS_CHANELS_PATH);
+
     }
 
     /**
@@ -55,7 +53,7 @@ class AppleNewsService extends BaseApplicationComponent
     {
         if (!isset($this->_channels)) {
             $this->_channels = [];
-            $channelConfigs = craft()->config->get('channels', 'src');
+            $channelConfigs = Plugin::getInstance()->getSettings()->channels;
 
             foreach ($channelConfigs as $config) {
                 $channel = Craft::createComponent($config);
@@ -115,13 +113,13 @@ class AppleNewsService extends BaseApplicationComponent
     /**
      * Returns all known info about an entry's articles on Apple News.
      *
-     * @param EntryModel           $entry     The entry
+     * @param Entry           $entry     The entry
      * @param string|string[]|null $channelId The channel ID(s) to limit the query to
      * @param bool                 $refresh   Whether the info should be refreshed for articles that are processing
      *
      * @return array[] The info, indexed by channel ID
      */
-    public function getArticleInfo(EntryModel $entry, $channelId = null, $refresh = false)
+    public function getArticleInfo(Entry $entry, $channelId = null, $refresh = false)
     {
         $attributes = ['entryId' => $entry->id];
         if ($channelId !== null) {
@@ -172,12 +170,12 @@ class AppleNewsService extends BaseApplicationComponent
     /**
      * Returns whether any channels can publish the given entry.
      *
-     * @param EntryModel           $entry
+     * @param Entry           $entry
      * @param string|string[]|null $channelId The channel ID(s) to post the article to, if not all
      *
      * @return bool Whether the entry can be published to any channels
      */
-    public function canPostArticle(EntryModel $entry)
+    public function canPostArticle(Entry $entry)
     {
         // See if any channels will have it
         foreach ($this->getChannels() as $channel) {
@@ -192,12 +190,12 @@ class AppleNewsService extends BaseApplicationComponent
     /**
      * Queues an article up to be posted.
      *
-     * @param EntryModel           $entry
+     * @param Entry           $entry
      * @param string|string[]|null $channelIds
      *
      * @return bool Whether the channel was queued up to be posted in any channels
      */
-    public function queueArticle(EntryModel $entry, $channelIds = null)
+    public function queueArticle(Entry $entry, $channelIds = null)
     {
         if ($channelIds === null) {
             // Queue all of them
@@ -251,12 +249,12 @@ class AppleNewsService extends BaseApplicationComponent
     /**
      * Returns the channel IDs that a given entry is queued to be posted in
      *
-     * @param EntryModel           $entry
+     * @param Entry           $entry
      * @param string|string[]|null $channelId The channel ID(s) the query should be limited to
      *
      * @return string[]
      */
-    public function getQueuedChannelIdsForEntry(EntryModel $entry, $channelId = null)
+    public function getQueuedChannelIdsForEntry(Entry $entry, $channelId = null)
     {
         $queuedChannelQuery = craft()->db->createCommand()
             ->select('channelId')
@@ -277,12 +275,12 @@ class AppleNewsService extends BaseApplicationComponent
     /**
      * Posts an article to Apple News.
      *
-     * @param EntryModel           $entry
+     * @param Entry           $entry
      * @param string|string[]|null $channelId The channel ID(s) to post the article to, if not all
      *
      * @return bool Whether the entry was posted to Apple News successfully
      */
-    public function postArticle(EntryModel $entry, $channelId = null)
+    public function postArticle(Entry $entry, $channelId = null)
     {
         if (is_string($channelId)) {
             $channelId = [$channelId];
@@ -373,11 +371,11 @@ class AppleNewsService extends BaseApplicationComponent
     /**
      * Deletes an article in a channel.
      *
-     * @param EntryModel $entry
+     * @param Entry $entry
      *
      * @return void
      */
-    public function deleteArticle(EntryModel $entry)
+    public function deleteArticle(Entry $entry)
     {
         $articleRecords = $this->getArticleRecordsForEntry($entry);
         $this->deleteArticlesFromRecords($articleRecords);
@@ -399,11 +397,11 @@ class AppleNewsService extends BaseApplicationComponent
     /**
      * Returns article records for a given entry ID, indexed by the channel ID.
      *
-     * @param EntryModel $entry
+     * @param Entry $entry
      *
      * @return AppleNews_ArticleRecord[]
      */
-    protected function getArticleRecordsForEntry(EntryModel $entry)
+    protected function getArticleRecordsForEntry(Entry $entry)
     {
         $records = AppleNews_ArticleRecord::model()->findAllByAttributes([
             'entryId' => $entry->id

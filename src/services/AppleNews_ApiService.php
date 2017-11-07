@@ -1,14 +1,18 @@
 <?php
-namespace Craft;
+namespace craft\applenews\services;
 
 use ChapterThree\AppleNewsAPI\PublisherAPI;
+use Craft;
+use craft\applenews\Plugin;
+use yii\base\Component;
+
 
 /**
  * Class AppleNews_ApiService
  *
  * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
  */
-class AppleNews_ApiService extends BaseApplicationComponent
+class AppleNews_ApiService extends Component
 {
     // Public Methods
     // =========================================================================
@@ -195,6 +199,6 @@ class AppleNews_ApiService extends BaseApplicationComponent
      */
     protected function getService()
     {
-        return craft()->appleNews;
+        return Plugin::getInstance()->appleNewsService;
     }
 }

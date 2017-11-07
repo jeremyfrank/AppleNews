@@ -1,6 +1,8 @@
 <?php
-namespace Craft;
-
+namespace craft\applenews\elementactions;
+use Craft;
+use craft\elements\Entry;
+use craft\applenews\services\AppleNewsService;
 /**
  * Class AppleNews_PostArticlesElementAction
  *
@@ -18,7 +20,7 @@ class AppleNews_PostArticlesElementAction extends BaseElementAction
      */
     public function getName()
     {
-        return Craft::t('Publish to Apple News');
+        return Craft::t('apple-news','Publish to Apple News');
     }
 
     /**
@@ -34,8 +36,8 @@ class AppleNews_PostArticlesElementAction extends BaseElementAction
         $service = craft()->appleNews;
 
         // Queue them up
-        foreach ($criteria->find() as $entry) {
-            /** @var EntryModel $entry */
+        foreach ($criteria->all() as $entry) {
+            /** @var Entry $entry */
             $service->queueArticle($entry);
         }
 

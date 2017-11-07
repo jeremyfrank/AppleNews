@@ -1,5 +1,5 @@
 <?php
-namespace Craft;
+namespace craft\applenews\tasks;
 
 /**
  * Class AppleNews_PostQueuedArticlesTask
@@ -26,7 +26,7 @@ class AppleNews_PostQueuedArticlesTask extends BaseTask
      */
     public function getDescription()
     {
-        return Craft::t('Publishing articles to Apple News');
+        return Craft::t('apple-news','Publishing articles to Apple News');
     }
 
     /**

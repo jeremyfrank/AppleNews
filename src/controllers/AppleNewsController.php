@@ -1,6 +1,7 @@
 <?php
-namespace Craft;
 
+namespace craft\applenews\controllers;
+use craft\elements\Entry;
 /**
  * Class AppleNewsController
  *
@@ -92,7 +93,7 @@ class AppleNewsController extends BaseController
     /**
      * @param bool $acceptRevision
      *
-     * @return EntryModel
+     * @return Entry
      * @throws HttpException
      */
     protected function getEntry($acceptRevision = false)
@@ -126,14 +127,14 @@ class AppleNewsController extends BaseController
     }
 
     /**
-     * @param EntryModel $entry
+     * @param Entry $entry
      * @param string     $channelId
      * @param bool       $refresh
      *
      * @return \array[]
      * @throws Exception
      */
-    protected function getArticleInfo(EntryModel $entry, $channelId, $refresh = false)
+    protected function getArticleInfo(Entry $entry, $channelId, $refresh = false)
     {
         $infos = $this->getService()->getArticleInfo($entry, $channelId, true);
 

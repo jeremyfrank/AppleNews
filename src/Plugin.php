@@ -1,30 +1,52 @@
 <?php
+
 namespace craft\applenews;
 
+use craft\elements\Entry;
 use Craft;
-use Craft\IAppleNewsChannel;
+use craft\IAppleNewsChannel;
+use craft\applenews\services\AppleNewsService;
+use craft\applenews\services\AppleNews_ApiService;
+use craft\events\RegisterUrlRulesEvent;
+use craft\web\UrlManager;
+use yii\base\Event;
+use craft\applenews\models\Settings;
 
 /**
  * Class AppleNewsPlugin
  *
  * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
  */
-class Plugin extends craft\base\plugin
+
+Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function(RegisterUrlRulesEvent $event) {
+    $event->rules['apple-news'] = 'appleNews/settings/index';
+});
+
+class Plugin extends craft\base\Plugin
 {
+
+
     /**
      * @return void
      */
     public function init()
     {
-        if (Craft::$app->config->get('autoPublishOnSave', 'src')) {
+        parent::init();
+
+
+        if ($this->getSettings()->autoPublishOnSave){
             Craft::$app->on('entries.saveEntry', [$this, 'handleEntrySave']);
         }
 
         Craft::$app->on('entries.beforeDeleteEntry', [$this, 'handleEntryDelete']);
-
-        Craft::$app->templates->hook('cp.entries.edit.right-pane', [
+        Craft::$app->getView()->hook('cp.entries.edit.right-pane', [
             $this,
             'addEditEntryPagePane'
+        ]);
+
+        $this->setComponents([
+            'appleNewsService' => \craft\applenews\services\AppleNewsService::class,
+            'appleNewsApiService' => \craft\applenews\services\AppleNews_ApiService::class,
         ]);
     }
 
@@ -35,7 +57,7 @@ class Plugin extends craft\base\plugin
      */
     public function handleEntrySave(Event $event)
     {
-        /** @var EntryModel $entry */
+        /** @var Entry $entry */
         $entry = $event->params['entry'];
 
         // Make sure it's not a revision
@@ -45,6 +67,7 @@ class Plugin extends craft\base\plugin
 
         // Queue it up to be posted to Apple News
         $this->getService()->queueArticle($entry);
+
     }
 
     /**
@@ -54,7 +77,7 @@ class Plugin extends craft\base\plugin
      */
     public function handleEntryDelete(Event $event)
     {
-        /** @var EntryModel $entry */
+        /** @var Entry $entry */
         $entry = $event->params['entry'];
 
         $this->getService()->deleteArticle($entry);
@@ -67,7 +90,7 @@ class Plugin extends craft\base\plugin
      */
     public function addEditEntryPagePane(&$context)
     {
-        /** @var EntryModel $entry */
+        /** @var Entry $entry */
         $entry = $context['entry'];
 
         if (!$entry->id) {
@@ -94,7 +117,7 @@ class Plugin extends craft\base\plugin
         $infos = $this->getService()->getArticleInfo($entry, array_keys($channels));
 
         $html = '<div class="pane lightpane meta" id="apple-news-pane">'.
-            '<h4 class="heading">'.Craft::t('Apple News Channels').'</h4>'.
+            '<h4 class="heading">'.Craft::t('apple-news','Apple News Channels').'</h4>'.
             '<div class="spinner hidden"></div>';
 
         foreach ($channels as $channelId => $channel) {
@@ -102,39 +125,39 @@ class Plugin extends craft\base\plugin
             switch ($state) {
                 case 'QUEUED':
                     $statusColor = 'grey';
-                    $statusMessage = Craft::t('The article is in the queue to be published.');
+                    $statusMessage = Craft::t('apple-news','The article is in the queue to be published.');
                     break;
                 case 'QUEUED_UPDATE':
                     $statusColor = 'grey';
-                    $statusMessage = Craft::t('A previous version of the article has been published, and an update is currently in the queue to be published.');
+                    $statusMessage = Craft::t('apple-news','A previous version of the article has been published, and an update is currently in the queue to be published.');
                     break;
                 case 'PROCESSING':
                     $statusColor = 'orange';
-                    $statusMessage = Craft::t('The article has been published and is going through processing.');
+                    $statusMessage = Craft::t('apple-news','The article has been published and is going through processing.');
                     break;
                 case 'PROCESSING_UPDATE':
                     $statusColor = 'orange';
-                    $statusMessage = Craft::t('A previous version of the article is visible in the News app, and an update is currently in processing.');
+                    $statusMessage = Craft::t('apple-news','A previous version of the article is visible in the News app, and an update is currently in processing.');
                     break;
                 case 'LIVE':
                     $statusColor = 'green';
-                    $statusMessage = Craft::t('The article has been published, finished processing, and is visible in the News app.');
+                    $statusMessage = Craft::t('apple-news','The article has been published, finished processing, and is visible in the News app.');
                     break;
                 case 'FAILED_PROCESSING':
                     $statusColor = 'red';
-                    $statusMessage = Craft::t('The article failed during processing and is not visible in the News app.');
+                    $statusMessage = Craft::t('apple-news','The article failed during processing and is not visible in the News app.');
                     break;
                 case 'FAILED_PROCESSING_UPDATE':
                     $statusColor = 'red';
-                    $statusMessage = Craft::t('A previous version of the article is visible in the News app, but an update failed during processing.');
+                    $statusMessage = Craft::t('apple-news','A previous version of the article is visible in the News app, but an update failed during processing.');
                     break;
                 case 'TAKEN_DOWN':
                     $statusColor = null;
-                    $statusMessage = Craft::t('The article was previously visible in the News app, but was taken down.');
+                    $statusMessage = Craft::t('apple-news','The article was previously visible in the News app, but was taken down.');
                     break;
                 default:
                     $statusColor = null;
-                    $statusMessage = Craft::t('The article has not been published yet.');
+                    $statusMessage = Craft::t('apple-news','The article has not been published yet.');
             }
 
             $html .= '<div class="data" data-channel-id="'.$channelId.'">'.
@@ -142,7 +165,7 @@ class Plugin extends craft\base\plugin
                 "<div class=\"status {$statusColor}\" title=\"{$statusMessage}\"></div>".
                 $this->getService()->getChannelName($channelId).
                 '</h5>'.
-                '<div class="value"><a class="btn menubtn" data-icon="settings" title="'.Craft::t('Actions').'"></a>'.
+                '<div class="value"><a class="btn menubtn" data-icon="settings" title="'.Craft::t('apple-news','Actions').'"></a>'.
                 '<div class="menu">'.
                 '<ul>';
 
@@ -153,7 +176,7 @@ class Plugin extends craft\base\plugin
                 'LIVE'
             ])) {
                 $shareUrl = $infos[$channelId]['shareUrl'];
-                $html .= '<li><a data-action="copy-share-url" data-url="'.$shareUrl.'">'.Craft::t('Copy share URL').'</a></li>';
+                $html .= '<li><a data-action="copy-share-url" data-url="'.$shareUrl.'">'.Craft::t('apple-news','Copy share URL').'</a></li>';
             }
 
             if (!in_array($state, [
@@ -161,10 +184,10 @@ class Plugin extends craft\base\plugin
                     'QUEUED_UPDATE'
                 ]) && !$isVersion && !$isDraft && $channel->canPublish($entry)
             ) {
-                $html .= '<li><a data-action="post-article">'.Craft::t('Publish to Apple News').'</a></li>';
+                $html .= '<li><a data-action="post-article">'.Craft::t('apple-news','Publish to Apple News').'</a></li>';
             } else {
                 // TODO: preview support that ignores canPublish()
-                //$html .= '<li><a data-action="post-preview">'.Craft::t('Post preview to Apple News').'</a></li>';
+                //$html .= '<li><a data-action="post-preview">'.Craft::t('apple-news','Post preview to Apple News').'</a></li>';
             }
 
             $downloadUrlParams = [
@@ -181,7 +204,7 @@ class Plugin extends craft\base\plugin
 
             $downloadUrl = UrlHelper::getActionUrl('appleNews/downloadArticle', $downloadUrlParams);
 
-            $html .= '<li><a href="'.$downloadUrl.'" target="_blank">'.Craft::t('Download for News Preview').'</a></li>'.
+            $html .= '<li><a href="'.$downloadUrl.'" target="_blank">'.Craft::t('apple-news','Download for News Preview').'</a></li>'.
                 '</ul>'.
                 '</div>'.
                 '</div>'.
@@ -250,6 +273,13 @@ EOT;
      */
     protected function getService()
     {
-        return Craft::$app->appleNews;
+        return $this->appleNewsService;
     }
+
+
+    protected function createSettingsModel()
+    {
+        return new Settings();
+    }
+
 }

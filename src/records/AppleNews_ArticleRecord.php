@@ -1,5 +1,6 @@
 <?php
-namespace Craft;
+
+namespace craft\applenews\records;
 
 /**
  * Class AppleNews_ArticleRecord

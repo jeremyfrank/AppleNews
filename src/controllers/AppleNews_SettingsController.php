@@ -1,12 +1,25 @@
 <?php
-namespace Craft;
+
+namespace craft\applenews\controllers;
+
+use craft\applenews\Plugin;
+use craft\applenews\services\AppleNews_ApiService;
+use craft\applenews\services\AppleNewsService;
+use craft\applenews\BaseAppleNewsChannel;
+use craft\elements\Entry;
+use craft\web\Controller;
+
+use Craft;
+use yii\base\Exception;
+use yii\web\HttpException;
+
 
 /**
  * Class AppleNews_SettingsController
  *
  * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
  */
-class AppleNews_SettingsController extends BaseController
+class AppleNews_SettingsController extends Controller
 {
     // Public Methods
     // =========================================================================
@@ -49,11 +62,10 @@ class AppleNews_SettingsController extends BaseController
      */
     public function actionGetArticleInfo()
     {
-        $foo = 'foo';
         $entry = $this->getEntry();
-        $channelId = craft()->request->getParam('channelId');
+        $channelId = Craft::$app->getRequest()->getParam('channelId');
 
-        $this->returnJson([
+        return $this->asJson([
             'infos' => $this->getArticleInfo($entry, $channelId, true),
         ]);
     }
@@ -64,12 +76,12 @@ class AppleNews_SettingsController extends BaseController
     public function actionPostArticle()
     {
         $entry = $this->getEntry();
-        $channelId = craft()->request->getParam('channelId');
+        $channelId = Craft::$app->getRequest()->getRequiredParam('channelId');
         $service = $this->getService();
 
         $service->queueArticle($entry, $channelId);
 
-        $this->returnJson([
+        return $this->asJson([
             'success' => true,
             'infos' => $this->getArticleInfo($entry, $channelId),
         ]);
@@ -81,27 +93,27 @@ class AppleNews_SettingsController extends BaseController
     /**
      * @param bool $acceptRevision
      *
-     * @return EntryModel
+     * @return Entry
      * @throws HttpException
      */
     protected function getEntry($acceptRevision = false)
     {
-        $entryId = craft()->request->getRequiredParam('entryId');
-        $localeId = craft()->request->getRequiredParam('locale');
+        $entryId = Craft::$app->getRequest()->getRequiredParam('entryId');
+        $localeId = Craft::$app->getRequest()->getRequiredParam('locale');
 
         if ($acceptRevision) {
-            $versionId = craft()->request->getParam('versionId');
-            $draftId = craft()->request->getParam('draftId');
+            $versionId = Craft::$app->getRequest()->getRequiredParam('versionId');
+            $draftId = Craft::$app->getRequest()->getRequiredParam('draftId');
         } else {
             $versionId = $draftId = null;
         }
 
         if ($versionId) {
-            $entry = craft()->entryRevisions->getVersionById($versionId);
+            $entry = Craft::$app->getEntryRevisions()->getVersionById($versionId);
         } elseif ($draftId) {
-            $entry = craft()->entryRevisions->getDraftById($draftId);
+            $entry = Craft::$app->getEntryRevisions()->getDraftById($draftId);
         } else {
-            $entry = craft()->entries->getEntryById($entryId, $localeId);
+            $entry = Craft::$app->getEntries()->getEntryById($entryId, $localeId);
         }
 
         if (!$entry) {
@@ -109,20 +121,20 @@ class AppleNews_SettingsController extends BaseController
         }
 
         // Make sure the user is allowed to edit entries in this section
-        craft()->userSession->requirePermission('editEntries:'.$entry->sectionId);
+        Craft::$app->getUser()->can('editEntries:'.$entry->sectionId);
 
         return $entry;
     }
 
     /**
-     * @param EntryModel $entry
-     * @param string     $channelId
-     * @param bool       $refresh
+     * @param Entry  $entry
+     * @param string $channelId
+     * @param bool   $refresh
      *
      * @return \array[]
      * @throws Exception
      */
-    protected function getArticleInfo(EntryModel $entry, $channelId, $refresh = false)
+    protected function getArticleInfo(Entry $entry, $channelId, $refresh = false)
     {
         $infos = $this->getService()->getArticleInfo($entry, $channelId, true);
 
@@ -140,7 +152,7 @@ class AppleNews_SettingsController extends BaseController
      */
     protected function getService()
     {
-        return craft()->appleNews;
+        return Plugin::getInstance()->appleNewsService;
     }
 
     /**
@@ -148,6 +160,6 @@ class AppleNews_SettingsController extends BaseController
      */
     protected function getApiService()
     {
-        return craft()->appleNews_api;
+        return Plugin::getInstance()->appleNewsApiService;
     }
 }

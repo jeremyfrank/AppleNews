@@ -1,5 +1,9 @@
 <?php
-namespace Craft;
+
+namespace craft\applenews;
+
+use craft\elements\Entry;
+use yii\base\Exception;
 
 /**
  * Class BaseAppleNewsChannel
@@ -56,7 +60,7 @@ abstract class BaseAppleNewsChannel implements IAppleNewsChannel
     /**
      * @inheritdoc
      */
-    public function matchEntry(EntryModel $entry)
+    public function matchEntry(Entry $entry)
     {
         return true;
     }
@@ -64,9 +68,9 @@ abstract class BaseAppleNewsChannel implements IAppleNewsChannel
     /**
      * @inheritdoc
      */
-    public function canPublish(EntryModel $entry)
+    public function canPublish(Entry $entry)
     {
-        if ($entry->getStatus() != EntryModel::LIVE) {
+        if ($entry->getStatus() != Entry::LIVE) {
             return false;
         }
 
@@ -76,7 +80,7 @@ abstract class BaseAppleNewsChannel implements IAppleNewsChannel
     /**
      * @inheritdoc
      */
-    public function createArticle(EntryModel $entry)
+    public function createArticle(Entry $entry)
     {
         throw new Exception('createArticle not implemented');
     }

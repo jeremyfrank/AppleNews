@@ -1,5 +1,7 @@
 <?php
-namespace Craft;
+namespace craft\applenews;
+
+use craft\base\Element;
 
 /**
  * Class AppleNewsArticle
@@ -12,7 +14,7 @@ class AppleNewsArticle implements IAppleNewsArticle
     // =========================================================================
 
     /**
-     * @var EntryModel The associated entry
+     * @var Element The associated entry
      */
     protected $entry;
 
@@ -37,9 +39,9 @@ class AppleNewsArticle implements IAppleNewsArticle
     /**
      * Constructor
      *
-     * @param EntryModel $entry
+     * @param Element $entry
      */
-    public function __construct(EntryModel $entry = null)
+    public function __construct(Element $entry = null)
     {
         $this->entry = $entry;
         $this->init();

@@ -1,6 +1,6 @@
 <?php
-namespace Craft;
-
+namespace craft\applenews\helpers;
+use craft\elements\Entry;
 use League\HTMLToMarkdown\HtmlConverter;
 
 /**
@@ -35,12 +35,12 @@ abstract class AppleNewsHelper
     /**
      * Creates a list of keywords for an article.
      *
-     * @param EntryModel $entry        The entry
+     * @param Entry $entry        The entry
      * @param string[]   $fieldHandles The field handles that the keywords should be extracted from
      *
      * @return string[] List of keywords for the article
      */
-    public static function createKeywords(EntryModel $entry, $fieldHandles)
+    public static function createKeywords(Entry $entry, $fieldHandles)
     {
         $keywords = [];
 
