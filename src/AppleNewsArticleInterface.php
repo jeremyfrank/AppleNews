@@ -1,6 +1,9 @@
 <?php
 namespace craft\applenews;
 
+use craft\elements\Asset;
+
+
 /**
  * Interface IAppleNewsArticle
  *
@@ -8,7 +11,7 @@ namespace craft\applenews;
  *
  * @see     https://developer.apple.com/library/ios/documentation/General/Conceptual/News_API_Ref/CreateArticle.html#//apple_ref/doc/uid/TP40015409-CH14-SW1
  */
-interface IAppleNewsArticle
+interface AppleNewsArticleInterface
 {
     // Public Methods
     // =========================================================================
@@ -27,9 +30,9 @@ interface IAppleNewsArticle
      *
      * This should be set to an array where the keys are the file URIs within the publish request
      * (everything after "bundle://") and the values are either strings (local path to the file)
-     * or {@link AssetFileModel}s.
+     * or {@link Asset}s.
      *
-     * @return string[]|AssetFileModel[]|null The files that are included in the article
+     * @return string[]|Asset[]|null The files that are included in the article
      */
     public function getFiles();
 

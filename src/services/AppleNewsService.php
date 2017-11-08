@@ -3,9 +3,11 @@ namespace craft\applenews\services;
 
 use ChapterThree\AppleNewsAPI\PublisherAPI;
 use Craft;
+use craft\applenews\AppleNewsChannelInterface;
 use craft\applenews\Plugin;
 use craft\elements\Entry;
 use yii\base\Component;
+use yii\base\Exception;
 
 
 /**
@@ -19,7 +21,7 @@ class AppleNewsService extends Component
     // =========================================================================
 
     /**
-     * @var IAppleNewsChannel[] The channels
+     * @var AppleNewsChannelInterface[] The channels
      */
     private $_channels;
 
@@ -46,8 +48,8 @@ class AppleNewsService extends Component
     /**
      * Returns all the channels.
      *
-     * @return IAppleNewsChannel[]
-     * @throws Exception if any of the channels don't implement IAppleNewsChannel.
+     * @return AppleNewsChannelInterface[]
+     * @throws Exception if any of the channels don't implement AppleNewsChannelInterface.
      */
     public function getChannels()
     {
@@ -58,8 +60,8 @@ class AppleNewsService extends Component
             foreach ($channelConfigs as $config) {
                 $channel = Craft::createComponent($config);
 
-                if (!($channel instanceof IAppleNewsChannel)) {
-                    throw new Exception('All Apple News channels must implement the IAppleNewsChannel interface');
+                if (!($channel instanceof AppleNewsChannelInterface)) {
+                    throw new Exception('All Apple News channels must implement the AppleNewsChannelInterface interface');
                 }
 
                 $this->_channels[$channel->getChannelId()] = $channel;
@@ -74,7 +76,7 @@ class AppleNewsService extends Component
      *
      * @param string $channelId The channel ID
      *
-     * @return IAppleNewsChannel
+     * @return AppleNewsChannelInterface
      * @throws Exception if no channel exists with that ID
      */
     public function getChannelById($channelId)
@@ -286,7 +288,7 @@ class AppleNewsService extends Component
             $channelId = [$channelId];
         }
 
-        /** @var IAppleNewsChannel[] $channels */
+        /** @var AppleNewsChannelInterface[] $channels */
         $channels = [];
 
         foreach ($this->getChannels() as $channel) {

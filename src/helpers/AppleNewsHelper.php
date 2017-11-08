@@ -1,6 +1,8 @@
 <?php
 namespace craft\applenews\helpers;
 use craft\elements\Entry;
+use craft\fields\data\RichTextData;
+use craft\helpers\StringHelper;
 use League\HTMLToMarkdown\HtmlConverter;
 
 /**
@@ -25,7 +27,7 @@ abstract class AppleNewsHelper
      *
      * @return string The formatted language ID
      */
-    public static function formatLanguage($language)
+    public static function formatLanguage($language): string
     {
         $parts = explode('_', $language);
 
@@ -40,7 +42,7 @@ abstract class AppleNewsHelper
      *
      * @return string[] List of keywords for the article
      */
-    public static function createKeywords(Entry $entry, $fieldHandles)
+    public static function createKeywords(Entry $entry, $fieldHandles): string
     {
         $keywords = [];
 
@@ -310,7 +312,7 @@ abstract class AppleNewsHelper
      *
      * @return array Component definitions
      */
-    public static function markdown2Components($text, $properties = [])
+    public static function markdown2Components($text, array $properties = []): array
     {
         // Convert Markdown to HTML and run through html2Components()
         $html = StringHelper::parseMarkdown($text);
@@ -326,7 +328,7 @@ abstract class AppleNewsHelper
      *
      * @return HtmlConverter
      */
-    protected static function getHtmlConverter()
+    protected static function getHtmlConverter(): HtmlConverter
     {
         if (!isset(self::$_htmlConverter)) {
             self::$_htmlConverter = new HtmlConverter([

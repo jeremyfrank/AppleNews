@@ -1,13 +1,24 @@
 <?php
 
 namespace craft\applenews\controllers;
+use Composer\Package\Archiver\ZipArchiver;
+use Craft;
+use craft\applenews\Plugin;
 use craft\elements\Entry;
+use craft\applenews\services\AppleNewsService;
+use craft\helpers\FileHelper;
+use craft\helpers\StringHelper;
+use craft\web\Controller;
+use yii\base\Exception;
+use yii\helpers\Json;
+use yii\web\HttpException;
+
 /**
  * Class AppleNewsController
  *
  * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
  */
-class AppleNewsController extends BaseController
+class AppleNewsController extends Controller
 {
     // Public Methods
     // =========================================================================
@@ -18,8 +29,9 @@ class AppleNewsController extends BaseController
     public function actionDownloadArticle()
     {
         $entry = $this->getEntry(true);
-        $channelId = craft()->request->getRequiredParam('channelId');
+        $channelId = Craft::$app->getRequest()->getRequiredParam('channelId');
         $channel = $this->getService()->getChannelById($channelId);
+
 
         if (!$channel->matchEntry($entry)) {
             throw new Exception('This channel does not want anything to do with this entry.');
@@ -28,33 +40,36 @@ class AppleNewsController extends BaseController
         $article = $channel->createArticle($entry);
 
         // Prep the zip staging folder
-        $zipDir = craft()->path->getTempPath().StringHelper::UUID();
+        $zipDir = Craft::$app->getPath()->getTempPath().StringHelper::UUID();
+
         $zipContentDir = $zipDir.'/'.$entry->slug;
-        IOHelper::createFolder($zipDir);
-        IOHelper::createFolder($zipContentDir);
+        FileHelper::createDirectory($zipDir);
+        FileHelper::createDirectory($zipContentDir);
 
         // Create article.json
-        $json = JsonHelper::encode($article->getContent());
-        IOHelper::writeToFile($zipContentDir.'/article.json', $json);
+        $json = Json::encode($article->getContent());
+        FileHelper::writeToFile($zipContentDir.'/article.json', $json);
 
         // Copy the files
         $files = $article->getFiles();
         if ($files) {
             foreach ($files as $uri => $path) {
-                IOHelper::copyFile($path, $zipContentDir.'/'.$uri);
+                FileHelper::copyDirectory($path, $zipContentDir.'/'.$uri);
             }
         }
 
         $zipFile = $zipDir.'.zip';
-        IOHelper::createFile($zipFile);
+        FileHelper::createDirectory($zipFile);
 
-        Zip::add($zipFile, $zipDir, $zipDir);
-        craft()->request->sendFile($zipFile, IOHelper::getFileContents($zipFile), [
+        ZipArchiver::archive($zipFile, $zipDir, $zipDir);
+
+        Craft::$app->getRequest()->sendFile($zipFile, FileHelper::getFileContents($zipFile), [
             'filename' => $entry->slug.'.zip',
             'forceDownload' => true
         ], false);
-        IOHelper::deleteFolder($zipDir);
-        IOHelper::deleteFile($zipFile);
+
+        FileHelper::clearDirectory($zipDir);
+        FileHelper::removeFile($zipFile);
     }
 
     /**
@@ -63,9 +78,9 @@ class AppleNewsController extends BaseController
     public function actionGetArticleInfo()
     {
         $entry = $this->getEntry();
-        $channelId = craft()->request->getParam('channelId');
+        $channelId = Craft::$app->getRequest()->getParam('channelId');
 
-        $this->returnJson([
+        return $this->asJson([
             'infos' => $this->getArticleInfo($entry, $channelId, true),
         ]);
     }
@@ -76,12 +91,12 @@ class AppleNewsController extends BaseController
     public function actionPostArticle()
     {
         $entry = $this->getEntry();
-        $channelId = craft()->request->getParam('channelId');
+        $channelId = Craft::$app->getRequest()->getParam('channelId');
         $service = $this->getService();
 
         $service->queueArticle($entry, $channelId);
 
-        $this->returnJson([
+        return $this->asJson([
             'success' => true,
             'infos' => $this->getArticleInfo($entry, $channelId),
         ]);
@@ -98,22 +113,22 @@ class AppleNewsController extends BaseController
      */
     protected function getEntry($acceptRevision = false)
     {
-        $entryId = craft()->request->getRequiredParam('entryId');
-        $localeId = craft()->request->getRequiredParam('locale');
+        $entryId = Craft::$app->getRequest()->getRequiredParam('entryId');
+        $localeId = Craft::$app->getRequest()->getRequiredParam('locale');
 
         if ($acceptRevision) {
-            $versionId = craft()->request->getParam('versionId');
-            $draftId = craft()->request->getParam('draftId');
+            $versionId = Craft::$app->getRequest()->getParam('versionId');
+            $draftId = Craft::$app->getRequest()->getParam('draftId');
         } else {
             $versionId = $draftId = null;
         }
 
         if ($versionId) {
-            $entry = craft()->entryRevisions->getVersionById($versionId);
+            $entry = Craft::$app->getEntryRevisions()->getVersionById($versionId);
         } elseif ($draftId) {
-            $entry = craft()->entryRevisions->getDraftById($draftId);
+            $entry = Craft::$app->getEntryRevisions()->getDraftById($draftId);
         } else {
-            $entry = craft()->entries->getEntryById($entryId, $localeId);
+            $entry = Craft::$app->getEntries()->getEntryById($entryId, $localeId);
         }
 
         if (!$entry) {
@@ -121,7 +136,7 @@ class AppleNewsController extends BaseController
         }
 
         // Make sure the user is allowed to edit entries in this section
-        craft()->userSession->requirePermission('editEntries:'.$entry->sectionId);
+        Craft::$app->getUser()->can('editEntries:'.$entry->sectionId);
 
         return $entry;
     }
@@ -152,6 +167,6 @@ class AppleNewsController extends BaseController
      */
     protected function getService()
     {
-        return craft()->appleNews;
+        return Plugin::getInstance()->appleNewsService;
     }
 }

@@ -1,6 +1,10 @@
 <?php
 namespace craft\applenews\elementactions;
 use Craft;
+use craft\applenews\Plugin;
+use craft\base\ElementAction;
+use craft\elements\db\ElementQuery;
+use craft\elements\db\ElementQueryInterface;
 use craft\elements\Entry;
 use craft\applenews\services\AppleNewsService;
 /**
@@ -8,7 +12,7 @@ use craft\applenews\services\AppleNewsService;
  *
  * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
  */
-class AppleNews_PostArticlesElementAction extends BaseElementAction
+class AppleNews_PostArticlesElementAction extends ElementAction
 {
     // Public Methods
     // =========================================================================
@@ -26,14 +30,14 @@ class AppleNews_PostArticlesElementAction extends BaseElementAction
     /**
      * @inheritDoc IElementAction::performAction()
      *
-     * @param ElementCriteriaModel $criteria
+     * @param ElementQuery $criteria
      *
      * @return bool
      */
-    public function performAction(ElementCriteriaModel $criteria)
+    public function performAction(ElementQueryInterface $criteria): bool
     {
         /** @var AppleNewsService $service */
-        $service = craft()->appleNews;
+        $service = Plugin::getInstance()->appleNewsService;
 
         // Queue them up
         foreach ($criteria->all() as $entry) {

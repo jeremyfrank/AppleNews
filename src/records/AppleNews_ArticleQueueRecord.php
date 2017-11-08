@@ -1,12 +1,14 @@
 <?php
 namespace craft\applenews\records;
 
+use craft\db\ActiveRecord;
+
 /**
  * Class AppleNews_ArticleQueueRecord
  *
  * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
  */
-class AppleNews_ArticleQueueRecord extends BaseRecord
+class AppleNews_ArticleQueueRecord extends ActiveRecord
 {
     // Public Methods
     // =========================================================================
@@ -16,33 +18,33 @@ class AppleNews_ArticleQueueRecord extends BaseRecord
      *
      * @return string
      */
-    public function getTableName()
+    public function getTableName(): string
     {
         return 'applenews_articlequeue';
     }
 
     /**
-     * @inheritDoc BaseRecord::defineRelations()
+     * @inheritDoc ActiveRecord::defineRelations()
      *
      * @return array
      */
-    public function defineRelations()
+    public function defineRelations(): array
     {
         return [
             'entry' => [
-                static::BELONGS_TO,
+                self::BELONGS_TO,
                 'EntryRecord',
-                'onDelete' => static::CASCADE
+                'onDelete' => self::CASCADE
             ],
         ];
     }
 
     /**
-     * @inheritDoc BaseRecord::defineIndexes()
+     * @inheritDoc ActiveRecord::defineIndexes()
      *
      * @return array
      */
-    public function defineIndexes()
+    public function defineIndexes(): array
     {
         return [
             ['columns' => ['entryId', 'locale', 'channelId'], 'unique' => true],
@@ -53,16 +55,15 @@ class AppleNews_ArticleQueueRecord extends BaseRecord
     // =========================================================================
 
     /**
-     * @inheritDoc BaseRecord::defineAttributes()
+     * @inheritDoc ActiveRecord::defineAttributes()
      *
      * @return array
      */
-    protected function defineAttributes()
+    protected function defineAttributes(): array
     {
         return [
-            'locale' => [AttributeType::Locale, 'required' => true],
+            'locale' => ['required' => true],
             'channelId' => [
-                AttributeType::String,
                 'required' => true,
                 'length' => 36
             ]

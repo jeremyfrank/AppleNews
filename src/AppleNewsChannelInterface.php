@@ -5,11 +5,11 @@ namespace craft\applenews;
 use craft\elements\Entry;
 
 /**
- * Interface IAppleNewsChannel
+ * Interface AppleNewsChannelInterface
  *
  * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
  */
-interface IAppleNewsChannel
+interface AppleNewsChannelInterface
 {
     // Public Methods
     // =========================================================================
@@ -48,11 +48,11 @@ interface IAppleNewsChannel
     public function canPublish(Entry $entry);
 
     /**
-     * Creates an {@link IAppleNewsArticle} for the given entry
+     * Creates an {@link AppleNewsArticleInterface} for the given entry
      *
      * @param Entry $entry The entry
      *
-     * @return IAppleNewsArticle The article that represents the entry
+     * @return AppleNewsArticleInterface The article that represents the entry
      */
     public function createArticle(Entry $entry);
 }

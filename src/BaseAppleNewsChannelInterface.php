@@ -10,7 +10,7 @@ use yii\base\Exception;
  *
  * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
  */
-abstract class BaseAppleNewsChannel implements IAppleNewsChannel
+abstract class BaseAppleNewsChannelInterface implements AppleNewsChannelInterface
 {
     // Properties
     // =========================================================================

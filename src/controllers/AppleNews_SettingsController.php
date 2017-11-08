@@ -5,10 +5,8 @@ namespace craft\applenews\controllers;
 use craft\applenews\Plugin;
 use craft\applenews\services\AppleNews_ApiService;
 use craft\applenews\services\AppleNewsService;
-use craft\applenews\BaseAppleNewsChannel;
 use craft\elements\Entry;
 use craft\web\Controller;
-
 use Craft;
 use yii\base\Exception;
 use yii\web\HttpException;

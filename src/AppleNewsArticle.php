@@ -8,7 +8,7 @@ use craft\base\Element;
  *
  * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
  */
-class AppleNewsArticle implements IAppleNewsArticle
+class AppleNewsArticle implements AppleNewsArticleInterface
 {
     // Properties
     // =========================================================================
