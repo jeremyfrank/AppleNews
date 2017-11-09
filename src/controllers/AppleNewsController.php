@@ -54,16 +54,16 @@ class AppleNewsController extends Controller
         $files = $article->getFiles();
         if ($files) {
             foreach ($files as $uri => $path) {
-                FileHelper::copyDirectory($path, $zipContentDir.'/'.$uri);
+                copy($path, $zipContentDir.'/'.$uri);
             }
         }
 
         $zipFile = $zipDir.'.zip';
-        FileHelper::createDirectory($zipFile);
+        touch($zipFile);
 
         ZipArchiver::archive($zipFile, $zipDir, $zipDir);
 
-        Craft::$app->getRequest()->sendFile($zipFile, FileHelper::getFileContents($zipFile), [
+        Craft::$app->getResponse()->sendFile($zipFile, file_get_contents($zipFile), [
             'filename' => $entry->slug.'.zip',
             'forceDownload' => true
         ], false);

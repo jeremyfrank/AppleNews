@@ -1,12 +1,19 @@
 <?php
+
 namespace craft\applenews\tasks;
+
+use Craft;
+use craft\applenews\Plugin;
+use craft\applenews\services\AppleNewsService;
+use craft\db\Query;
+use craft\queue\BaseJob;
 
 /**
  * Class AppleNews_PostQueuedArticlesTask
  *
  * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
  */
-class AppleNews_PostQueuedArticlesTask extends BaseTask
+class AppleNews_PostQueuedArticlesJob extends BaseJob
 {
     // Properties
     // =========================================================================
@@ -19,44 +26,26 @@ class AppleNews_PostQueuedArticlesTask extends BaseTask
     // Public Methods
     // =========================================================================
 
-    /**
-     * @inheritDoc ITask::getDescription()
-     *
-     * @return string
-     */
-    public function getDescription()
+    public function execute($queue)
     {
-        return Craft::t('apple-news','Publishing articles to Apple News');
-    }
-
-    /**
-     * @inheritDoc ITask::getTotalSteps()
-     *
-     * @return int
-     */
-    public function getTotalSteps()
-    {
-        $limit = $this->getSettings()->limit;
-        $db = craft()->db;
-
+        $limit = Plugin::getInstance()->getSettings()->limit;
         // Get the rows
-        $rows = $db->createCommand()
+        $rows = (new Query())
             ->select('id, entryId, locale, channelId')
             ->from('applenews_articlequeue')
             ->order('id asc')
             ->limit($limit)
-            ->queryAll();
+            ->all();
 
         // If there are any more, create a follow-up task.
         if ($limit) {
-            $total = $db->createCommand()
+            $total = (new Query())
                 ->from('applenews_articlequeue')
                 ->count('id');
             if ($total > $limit) {
-                $this->getService()->createPostQueuedArticlesTask();
+                $this->getService()->createPostQueuedArticlesJob();
             }
         }
-
         $this->_stepInfo = [];
 
         foreach ($rows as $row) {
@@ -74,38 +63,17 @@ class AppleNews_PostQueuedArticlesTask extends BaseTask
         return count($this->_stepInfo);
     }
 
-    /**
-     * @inheritDoc ITask::runStep()
-     *
-     * @param int $step
-     *
-     * @return bool
-     */
-    public function runStep($step)
-    {
-        $info = array_shift($this->_stepInfo);
-        $entry = craft()->entries->getEntryById($info['entryId'], $info['locale']);
-
-        if ($entry) {
-            $this->getService()->postArticle($entry, $info['channelIds']);
-        }
-
-        return true;
-    }
-
     // Protected Methods
     // =========================================================================
 
     /**
-     * @inheritDoc BaseSavableComponentType::defineSettings()
+     * @inheritDoc ITask::getDescription()
      *
-     * @return array
+     * @return string
      */
-    protected function defineSettings()
+    protected function defaultDescription(): string
     {
-        return [
-            'limit' => [AttributeType::Number, 'default' => 50],
-        ];
+        return Craft::t('apple-news', 'Publishing articles to Apple News');
     }
 
     /**
@@ -113,6 +81,7 @@ class AppleNews_PostQueuedArticlesTask extends BaseTask
      */
     protected function getService()
     {
-        return craft()->appleNews;
+        return Plugin::getInstance()->appleNewsService;
     }
+
 }

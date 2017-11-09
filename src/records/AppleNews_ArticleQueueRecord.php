@@ -1,12 +1,20 @@
 <?php
+
 namespace craft\applenews\records;
 
 use craft\db\ActiveRecord;
+use yii\db\ActiveQueryInterface;
+use craft\elements\Entry;
 
 /**
- * Class AppleNews_ArticleQueueRecord
+ * Class AppleNews_ArticleQueueRecord record.
  *
- * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
+ * @property \Locale $locale     Locale
+ * @property string    $channelId  Channel ID
+ * @property int $entryId      Entry ID
+ *
+ * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
+ * @since  3.0
  */
 class AppleNews_ArticleQueueRecord extends ActiveRecord
 {
@@ -14,59 +22,23 @@ class AppleNews_ArticleQueueRecord extends ActiveRecord
     // =========================================================================
 
     /**
-     * @inheritDoc BaseRecord::getTableName()
+     * @inheritdoc
      *
      * @return string
      */
-    public function getTableName(): string
+    public static function tableName(): string
     {
-        return 'applenews_articlequeue';
+        return '{{%applenews_articlequeue}}';
     }
 
     /**
-     * @inheritDoc ActiveRecord::defineRelations()
+     * Returns the entry’s entry.
      *
-     * @return array
+     * @return ActiveQueryInterface The relational query object.
      */
-    public function defineRelations(): array
+    public function getEntry(): ActiveQueryInterface
     {
-        return [
-            'entry' => [
-                self::BELONGS_TO,
-                'EntryRecord',
-                'onDelete' => self::CASCADE
-            ],
-        ];
+        return $this->hasOne(Entry::class,['id' => 'entryId']);
     }
 
-    /**
-     * @inheritDoc ActiveRecord::defineIndexes()
-     *
-     * @return array
-     */
-    public function defineIndexes(): array
-    {
-        return [
-            ['columns' => ['entryId', 'locale', 'channelId'], 'unique' => true],
-        ];
-    }
-
-    // Protected Methods
-    // =========================================================================
-
-    /**
-     * @inheritDoc ActiveRecord::defineAttributes()
-     *
-     * @return array
-     */
-    protected function defineAttributes(): array
-    {
-        return [
-            'locale' => ['required' => true],
-            'channelId' => [
-                'required' => true,
-                'length' => 36
-            ]
-        ];
-    }
 }

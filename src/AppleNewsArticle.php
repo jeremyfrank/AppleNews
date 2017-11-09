@@ -2,6 +2,8 @@
 namespace craft\applenews;
 
 use craft\base\Element;
+use\craft\elements\Asset;
+use craft\helpers\FileHelper;
 
 /**
  * Class AppleNewsArticle
@@ -77,19 +79,19 @@ class AppleNewsArticle implements AppleNewsArticleInterface
      *
      * @return string The URL that the article should use to reference the file
      */
-    public function addFile($file)
+    public function addFile($file): string
     {
-        if ($file instanceof AssetFileModel) {
+        if ($file instanceof Asset) {
             // Get the local path to the file (and copy it from its remote source if need be)
             $file = $file->getTransformSource();
         }
 
         // Get a unique filename for the article
-        $filename = IOHelper::getFileName($file);
+        $filename = basename($file);
         $filename = str_replace('@', '', $filename);
         if (isset($this->files[$filename])) {
-            $basename = IOHelper::getFileName($file, false);
-            $ext = IOHelper::getExtension($file);
+            $basename = basename($file, false);
+            $ext = pathinfo($file);
             $i = 0;
             do {
                 $filename = $basename.'_'.++$i.'.'.$ext;

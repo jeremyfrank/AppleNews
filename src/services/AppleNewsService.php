@@ -5,9 +5,14 @@ use ChapterThree\AppleNewsAPI\PublisherAPI;
 use Craft;
 use craft\applenews\AppleNewsChannelInterface;
 use craft\applenews\Plugin;
+use craft\applenews\records\AppleNews_ArticleRecord;
+use craft\applenews\tasks\AppleNews_PostQueuedArticlesJob;
+use craft\db\Connection;
 use craft\elements\Entry;
 use yii\base\Component;
 use yii\base\Exception;
+use yii\di\Instance;
+use yii\helpers\Json;
 
 
 /**
@@ -39,6 +44,7 @@ class AppleNewsService extends Component
     public function init()
     {
 
+
         // Set the applenewschannels alias
         defined('APPLE_NEWS_CHANELS_PATH') || define('APPLE_NEWS_CHANELS_PATH', CRAFT_BASE_PATH.'applenewschannels/');
         Craft::setAlias('applenewschannels', APPLE_NEWS_CHANELS_PATH);
@@ -51,14 +57,14 @@ class AppleNewsService extends Component
      * @return AppleNewsChannelInterface[]
      * @throws Exception if any of the channels don't implement AppleNewsChannelInterface.
      */
-    public function getChannels()
+    public function getChannels(): array
     {
         if (!isset($this->_channels)) {
             $this->_channels = [];
             $channelConfigs = Plugin::getInstance()->getSettings()->channels;
 
             foreach ($channelConfigs as $config) {
-                $channel = Craft::createComponent($config);
+                $channel = Craft::$app->getComponents($config);
 
                 if (!($channel instanceof AppleNewsChannelInterface)) {
                     throw new Exception('All Apple News channels must implement the AppleNewsChannelInterface interface');
@@ -79,7 +85,7 @@ class AppleNewsService extends Component
      * @return AppleNewsChannelInterface
      * @throws Exception if no channel exists with that ID
      */
-    public function getChannelById($channelId)
+    public function getChannelById($channelId): AppleNewsChannelInterface
     {
         $channels = $this->getChannels();
 
@@ -98,15 +104,15 @@ class AppleNewsService extends Component
      * @return string The channel name
      * @throws Exception if no channel exists with that ID
      */
-    public function getChannelName($channelId)
+    public function getChannelName($channelId): string
     {
         $cacheKey = 'appleNews:channelName:'.$channelId;
-        $name = craft()->cache->get($cacheKey);
+        $name = Craft::$app->getCache()->get($cacheKey);
 
         if ($name === false) {
             $info = $this->getApiService()->readChannel($channelId);
             $name = $info->data->name;
-            craft()->cache->set($cacheKey, $name, 0);
+            Craft::$app->getCache()->set($cacheKey, $name, 0);
         }
 
         return $name;
@@ -121,7 +127,7 @@ class AppleNewsService extends Component
      *
      * @return array[] The info, indexed by channel ID
      */
-    public function getArticleInfo(Entry $entry, $channelId = null, $refresh = false)
+    public function getArticleInfo(Entry $entry, $channelId = null, $refresh = false): array
     {
         $attributes = ['entryId' => $entry->id];
         if ($channelId !== null) {
@@ -212,7 +218,7 @@ class AppleNewsService extends Component
         }
 
         if ($channelIds) {
-            $db = craft()->db;
+            $db = Craft::$app->getDb();
             foreach ($channelIds as $channelId) {
                 $db->createCommand()->insertOrUpdate(
                     'applenews_articlequeue',
@@ -225,7 +231,7 @@ class AppleNewsService extends Component
             }
 
             // Create a PostQueuedArticles task
-            $this->createPostQueuedArticlesTask();
+            $this->createPostQueuedArticlesJob();
 
             return true;
         } else {
@@ -234,17 +240,21 @@ class AppleNewsService extends Component
     }
 
     /**
-     * Creates a new PostQueuedArticles task if there isn't already one pending
+     * Creates a new PostQueuedArticles job if there isn't already one pending
      *
      * @return void
      */
-    public function createPostQueuedArticlesTask()
+    public function createPostQueuedArticlesJob(): void
     {
         $tasksService = craft()->tasks;
-        $task = $tasksService->getNextPendingTask('AppleNews_PostQueuedArticles');
+        //$job = $tasksService->getNextPendingTask('AppleNews_PostQueuedArticles');
+        $job = Craft::$app->queue->isDone(AppleNews_PostQueuedArticlesJob::class);
 
-        if (!$task) {
-            $tasksService->createTask('AppleNews_PostQueuedArticles');
+        if (!$job) {
+            Craft::$app->queue->push(new AppleNews_PostQueuedArticlesJob([
+                'description' => 'Custom description',
+                'mySetting' => 'value',
+            ]));
         }
     }
 
@@ -256,9 +266,9 @@ class AppleNewsService extends Component
      *
      * @return string[]
      */
-    public function getQueuedChannelIdsForEntry(Entry $entry, $channelId = null)
+    public function getQueuedChannelIdsForEntry(Entry $entry, $channelId = null): string
     {
-        $queuedChannelQuery = craft()->db->createCommand()
+        $queuedChannelQuery = $this->db->createCommand()
             ->select('channelId')
             ->from('applenews_articlequeue')
             ->where('entryId = :entryId', [':entryId' => $entry->id]);
@@ -329,8 +339,8 @@ class AppleNewsService extends Component
             // Prepare the data and send the request
             $data = [
                 'files' => $article->getFiles(),
-                'metadata' => $metadata ? JsonHelper::encode(['data' => $metadata]) : null,
-                'json' => JsonHelper::encode($content)
+                'metadata' => $metadata ? Json::encode(['data' => $metadata]) : null,
+                'json' => Json::encode($content)
             ];
 
             // Publish the article
@@ -354,7 +364,7 @@ class AppleNewsService extends Component
                 $this->updateArticleRecord($record, $response);
 
                 // Delete this entry+channel from the queue, if it's in there
-                craft()->db->createCommand()->delete('applenews_articlequeue',
+                Craft::$app->getDb()->createCommand()->delete('applenews_articlequeue',
                     ['entryId' => $entry->id, 'channelId' => $channelId]);
             }
 
@@ -393,8 +403,9 @@ class AppleNewsService extends Component
      */
     protected function getApiService()
     {
-        return craft()->appleNews_api;
+        return Plugin::getInstance()->appleNewsApiService;
     }
+
 
     /**
      * Returns article records for a given entry ID, indexed by the channel ID.
@@ -448,7 +459,7 @@ class AppleNewsService extends Component
         $record->isPreview = $response->data->isPreview;
         $record->state = $response->data->state;
         $record->shareUrl = $response->data->shareUrl;
-        $record->response = JsonHelper::encode($response);
+        $record->response = Json::encode($response);
 
         $record->save();
     }
@@ -462,7 +473,7 @@ class AppleNewsService extends Component
             $this->_generatorMetadata = [
                 'generatorIdentifier' => 'CraftCMS',
                 'generatorName' => 'Craft CMS',
-                'generatorVersion' => craft()->plugins->getPlugin('src')->getVersion(),
+                'generatorVersion' => Craft::$app->getPlugins()->getPlugin('src')->getVersion(),
             ];
         }
 

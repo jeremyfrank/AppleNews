@@ -9,10 +9,14 @@ use Craft;
 use craft\applenews\services\AppleNewsService;
 use craft\applenews\services\AppleNews_ApiService;
 use craft\events\RegisterUrlRulesEvent;
+use craft\helpers\UrlHelper;
+use craft\models\EntryDraft;
+use craft\models\EntryVersion;
 use craft\web\UrlManager;
 use yii\base\Event;
 use craft\applenews\models\Settings;
 use craft\events\RegisterElementActionsEvent;
+use yii\helpers\Json;
 
 
 /**
@@ -55,6 +59,10 @@ class Plugin extends craft\base\Plugin
             'appleNewsService' => AppleNewsService::class,
             'appleNewsApiService' => AppleNews_ApiService::class,
         ]);
+
+
+
+
     }
 
     /**
@@ -62,13 +70,13 @@ class Plugin extends craft\base\Plugin
      *
      * @return void
      */
-    public function handleEntrySave(Event $event)
+    public function handleEntrySave(Event $event): void
     {
         /** @var Entry $entry */
         $entry = $event->params['entry'];
 
         // Make sure it's not a revision
-        if ($entry instanceof EntryVersionModel || $entry instanceof EntryDraftModel) {
+        if ($entry instanceof EntryVersion || $entry instanceof EntryDraft) {
             return;
         }
 
@@ -81,7 +89,7 @@ class Plugin extends craft\base\Plugin
      *
      * @return void
      */
-    public function handleEntryDelete(Event $event)
+    public function handleEntryDelete(Event $event): void
     {
         /** @var Entry $entry */
         $entry = $event->params['entry'];
@@ -94,7 +102,7 @@ class Plugin extends craft\base\Plugin
      *
      * @return string
      */
-    public function addEditEntryPagePane(&$context)
+    public function addEditEntryPagePane(&$context): string
     {
         /** @var Entry $entry */
         $entry = $context['entry'];
@@ -116,8 +124,8 @@ class Plugin extends craft\base\Plugin
             return '';
         }
 
-        $isVersion = ($entry instanceof EntryVersionModel);
-        $isDraft = ($entry instanceof EntryDraftModel);
+        $isVersion = ($entry instanceof EntryVersion);
+        $isDraft = ($entry instanceof EntryDraft);
 
         // Get any existing records for these channels.
         $infos = $this->getService()->getArticleInfo($entry, array_keys($channels));
@@ -208,7 +216,7 @@ class Plugin extends craft\base\Plugin
                 $downloadUrlParams['draftId'] = $entry->draftId;
             }
 
-            $downloadUrl = UrlHelper::getActionUrl('appleNews/downloadArticle', $downloadUrlParams);
+            $downloadUrl = UrlHelper::actionUrl('appleNews/downloadArticle', $downloadUrlParams);
 
             $html .= '<li><a href="'.$downloadUrl.'" target="_blank">'.Craft::t('apple-news', 'Download for News Preview').'</a></li>'.
                 '</ul>'.
@@ -219,10 +227,13 @@ class Plugin extends craft\base\Plugin
 
         $html .= '</div>';
 
-        Craft::$app->templates->includeCssResource('src/css/edit-entry.css');
-        Craft::$app->templates->includeJsResource('src/js/ArticlePane.js');
 
-        $infosJs = JsonHelper::encode($infos);
+        Craft::$app->getView()->registerAssetBundle(Asset::class);
+        Craft::$app->getView()->registerCss(Asset::class);
+        Craft::$app->getView()->registerJs(Asset::class);
+
+
+        $infosJs = Json::encode($infos);
         $versionIdJs = $isVersion ? $entry->versionId : 'null';
         $draftIdJs = $isDraft ? $entry->draftId : 'null';
 
@@ -236,7 +247,7 @@ Garnish.\$doc.ready(function() {
 		{$infosJs});
 });
 EOT;
-        Craft::$app->templates->includeJs($js);
+        Craft::$app->getView()->registerJs($js);
 
         return $html;
     }
@@ -248,7 +259,7 @@ EOT;
      *
      * @return array The bulk actions
      */
-    public function addEntryActions($source)
+    public function addEntryActions($source): array
     {
         $actions = [];
 
@@ -277,13 +288,15 @@ EOT;
     /**
      * @return AppleNewsService
      */
-    protected function getService()
+    protected function getService(): AppleNewsService
     {
         return $this->appleNewsService;
     }
 
-
-    protected function createSettingsModel()
+    /**
+     * @return Settings
+     */
+    protected function createSettingsModel(): Settings
     {
         return new Settings();
     }

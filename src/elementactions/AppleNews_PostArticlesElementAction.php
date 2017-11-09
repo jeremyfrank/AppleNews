@@ -22,7 +22,7 @@ class AppleNews_PostArticlesElementAction extends ElementAction
      *
      * @return string
      */
-    public function getName()
+    public function getTriggerLabel(): string
     {
         return Craft::t('apple-news','Publish to Apple News');
     }

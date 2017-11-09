@@ -8,10 +8,6 @@ class Settings extends Model
 {
     public $channels = [];
     public $autoPublishOnSave = true;
+    public $limit;
 
-    public function rules()
-    {
-
-
-    }
 }

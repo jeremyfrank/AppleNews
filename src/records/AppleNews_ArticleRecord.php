@@ -2,12 +2,28 @@
 
 namespace craft\applenews\records;
 
+use craft\db\ActiveRecord;
+use yii\db\ActiveQueryInterface;
+use craft\elements\Entry;
+
+
 /**
- * Class AppleNews_ArticleRecord
+ * Class AppleNews_ArticleRecord record.
  *
- * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
+ * @property string $channelId         Channel ID
+ * @property int    $entryId           Entry ID
+ * @property string $articleId         Article ID
+ * @property string $revisionId        Revision ID
+ * @property bool   $isSponsored       Is Sponsored
+ * @property bool   $isPreview         Is Preview
+ * @property string $state             State
+ * @property \Url   $shareUrl          Share Url
+ * @property Mixed  $response          Response
+ *
+ * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
+ * @since  3.0
  */
-class AppleNews_ArticleRecord extends BaseRecord
+class AppleNews_ArticleRecord extends ActiveRecord
 {
     // Public Methods
     // =========================================================================
@@ -23,64 +39,14 @@ class AppleNews_ArticleRecord extends BaseRecord
     }
 
     /**
-     * @inheritDoc BaseRecord::defineRelations()
+     * Returns the entry’s entry.
      *
-     * @return array
+     * @return ActiveQueryInterface The relational query object.
      */
-    public function defineRelations()
+    public function getEntry(): ActiveQueryInterface
     {
-        return [
-            'entry' => [
-                static::BELONGS_TO,
-                'EntryRecord',
-                'onDelete' => static::CASCADE
-            ],
-        ];
+        return $this->hasOne(Entry::class, ['id' => 'entryId']);
     }
 
-    /**
-     * @inheritDoc BaseRecord::defineIndexes()
-     *
-     * @return array
-     */
-    public function defineIndexes()
-    {
-        return [
-            ['columns' => ['entryId', 'channelId'], 'unique' => true],
-        ];
-    }
 
-    // Protected Methods
-    // =========================================================================
-
-    /**
-     * @inheritDoc BaseRecord::defineAttributes()
-     *
-     * @return array
-     */
-    protected function defineAttributes()
-    {
-        return [
-            'channelId' => [
-                AttributeType::String,
-                'required' => true,
-                'length' => 36
-            ],
-            'articleId' => [
-                AttributeType::String,
-                'required' => true,
-                'length' => 36
-            ],
-            'revisionId' => [
-                AttributeType::String,
-                'required' => true,
-                'length' => 24
-            ],
-            'isSponsored' => [AttributeType::Bool],
-            'isPreview' => [AttributeType::Bool],
-            'state' => [AttributeType::String],
-            'shareUrl' => [AttributeType::Url],
-            'response' => [AttributeType::Mixed],
-        ];
-    }
 }
