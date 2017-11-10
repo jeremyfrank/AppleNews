@@ -1,4 +1,5 @@
 <?php
+
 namespace craft\applenews\services;
 
 use ChapterThree\AppleNewsAPI\PublisherAPI;
@@ -7,11 +8,11 @@ use craft\applenews\AppleNewsChannelInterface;
 use craft\applenews\Plugin;
 use craft\applenews\records\AppleNews_ArticleRecord;
 use craft\applenews\tasks\AppleNews_PostQueuedArticlesJob;
-use craft\db\Connection;
+
 use craft\elements\Entry;
 use yii\base\Component;
 use yii\base\Exception;
-use yii\di\Instance;
+
 use yii\helpers\Json;
 
 
@@ -48,7 +49,6 @@ class AppleNewsService extends Component
         // Set the applenewschannels alias
         defined('APPLE_NEWS_CHANELS_PATH') || define('APPLE_NEWS_CHANELS_PATH', CRAFT_BASE_PATH.'applenewschannels/');
         Craft::setAlias('applenewschannels', APPLE_NEWS_CHANELS_PATH);
-
     }
 
     /**
@@ -121,7 +121,7 @@ class AppleNewsService extends Component
     /**
      * Returns all known info about an entry's articles on Apple News.
      *
-     * @param Entry           $entry     The entry
+     * @param Entry                $entry     The entry
      * @param string|string[]|null $channelId The channel ID(s) to limit the query to
      * @param bool                 $refresh   Whether the info should be refreshed for articles that are processing
      *
@@ -178,7 +178,7 @@ class AppleNewsService extends Component
     /**
      * Returns whether any channels can publish the given entry.
      *
-     * @param Entry           $entry
+     * @param Entry                $entry
      * @param string|string[]|null $channelId The channel ID(s) to post the article to, if not all
      *
      * @return bool Whether the entry can be published to any channels
@@ -198,12 +198,12 @@ class AppleNewsService extends Component
     /**
      * Queues an article up to be posted.
      *
-     * @param Entry           $entry
+     * @param Entry                $entry
      * @param string|string[]|null $channelIds
      *
      * @return bool Whether the channel was queued up to be posted in any channels
      */
-    public function queueArticle(Entry $entry, $channelIds = null)
+    public function queueArticle(Entry $entry, $channelIds = null): bool
     {
         if ($channelIds === null) {
             // Queue all of them
@@ -218,26 +218,23 @@ class AppleNewsService extends Component
         }
 
         if ($channelIds) {
-            $db = Craft::$app->getDb();
             foreach ($channelIds as $channelId) {
-                $db->createCommand()->insertOrUpdate(
-                    'applenews_articlequeue',
-                    [
-                        'entryId' => $entry->id,
-                        'locale' => $entry->locale,
-                        'channelId' => $channelId
-                    ],
-                    []);
+                $result = \Craft::$app->db->createCommand()
+                    ->upsert('{{%applenews_articlequeue}}', 'entryId')
+                    ->upsert('{{%applenews_articlequeue}}', 'locale')
+                    ->upsert('{{%applenews_articlequeue}}', 'channelId')
+                    ->execute();
+
+                // Create a PostQueuedArticles task
+                $this->createPostQueuedArticlesJob();
+
+                return true;
             }
-
-            // Create a PostQueuedArticles task
-            $this->createPostQueuedArticlesJob();
-
-            return true;
         } else {
             return false;
         }
     }
+
 
     /**
      * Creates a new PostQueuedArticles job if there isn't already one pending
@@ -246,29 +243,24 @@ class AppleNewsService extends Component
      */
     public function createPostQueuedArticlesJob(): void
     {
-        $tasksService = craft()->tasks;
-        //$job = $tasksService->getNextPendingTask('AppleNews_PostQueuedArticles');
-        $job = Craft::$app->queue->isDone(AppleNews_PostQueuedArticlesJob::class);
-
-        if (!$job) {
-            Craft::$app->queue->push(new AppleNews_PostQueuedArticlesJob([
-                'description' => 'Custom description',
-                'mySetting' => 'value',
-            ]));
-        }
+        Craft::$app->queue->push(new AppleNews_PostQueuedArticlesJob([
+            'description' => 'Custom description',
+            'mySetting' => 'value',
+        ]));
     }
 
     /**
      * Returns the channel IDs that a given entry is queued to be posted in
      *
-     * @param Entry           $entry
+     * @param Entry                $entry
      * @param string|string[]|null $channelId The channel ID(s) the query should be limited to
      *
      * @return string[]
      */
+
     public function getQueuedChannelIdsForEntry(Entry $entry, $channelId = null): string
     {
-        $queuedChannelQuery = $this->db->createCommand()
+        $queuedChannelQuery = Craft::$app->db->createCommand()
             ->select('channelId')
             ->from('applenews_articlequeue')
             ->where('entryId = :entryId', [':entryId' => $entry->id]);
@@ -287,7 +279,7 @@ class AppleNewsService extends Component
     /**
      * Posts an article to Apple News.
      *
-     * @param Entry           $entry
+     * @param Entry                $entry
      * @param string|string[]|null $channelId The channel ID(s) to post the article to, if not all
      *
      * @return bool Whether the entry was posted to Apple News successfully
@@ -467,7 +459,7 @@ class AppleNewsService extends Component
     /**
      * @return array Generator metadata properties
      */
-    protected function getGeneratorMetadata()
+    protected function getGeneratorMetadata(): array
     {
         if (!isset($this->_generatorMetadata)) {
             $this->_generatorMetadata = [

@@ -26,14 +26,18 @@ class AppleNews_PostQueuedArticlesJob extends BaseJob
     // Public Methods
     // =========================================================================
 
-    public function execute($queue)
+    /**
+     * @return void
+     */
+    public function execute($queue): void
     {
+        //get total step info
         $limit = Plugin::getInstance()->getSettings()->limit;
+
         // Get the rows
         $rows = (new Query())
             ->select('id, entryId, locale, channelId')
             ->from('applenews_articlequeue')
-            ->order('id asc')
             ->limit($limit)
             ->all();
 
@@ -60,7 +64,18 @@ class AppleNews_PostQueuedArticlesJob extends BaseJob
             $this->_stepInfo[$entryId]['channelIds'][] = $row['channelId'];
         }
 
-        return count($this->_stepInfo);
+        $totalSteps = count($this->_stepInfo);
+
+        // execute posting article
+        for ($step = 0; $step < $totalSteps; $step++) {
+            $this->setProgress($queue, $step / $totalSteps);
+            $info = array_shift($this->_stepInfo);
+            $entry = Craft::$app->getEntries()->getEntryById($info['entryId'], $info['locale']);
+
+            if ($entry) {
+                $this->getService()->postArticle($entry, $info['channelIds']);
+            }
+        }
     }
 
     // Protected Methods

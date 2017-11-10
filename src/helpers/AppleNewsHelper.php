@@ -1,8 +1,12 @@
 <?php
 namespace craft\applenews\helpers;
+use craft\base\Field;
+use craft\base\FieldInterface;
 use craft\elements\Entry;
 use craft\fields\data\RichTextData;
 use craft\helpers\StringHelper;
+use craft\models\FieldLayout;
+use craft\services\Fields;
 use League\HTMLToMarkdown\HtmlConverter;
 
 /**
@@ -47,7 +51,7 @@ abstract class AppleNewsHelper
         $keywords = [];
 
         // Find the fields
-        /** @var FieldModel[] $fields */
+        /** @var FieldLayout[] $fields */
         $fields = [];
         foreach ($entry->getFieldLayout()->getFields() as $fieldLayoutField) {
             $field = $fieldLayoutField->getField();
@@ -58,12 +62,14 @@ abstract class AppleNewsHelper
         }
 
         // Add the keywords in the order defined by $fieldHandles
+
         foreach ($fieldHandles as $fieldHandle) {
             if (isset($fields[$fieldHandle])) {
-                $fieldType = $fields[$fieldHandle]->getFieldType();
+                /** @var Fields[] $fieldType */
+                $fieldType = $fields[$fieldHandle]->getFieldTypes();
                 if ($fieldType) {
                     $fieldType->element = $entry;
-                    $fieldKeywords = StringHelper::normalizeKeywords($fieldType->getSearchKeywords($entry->getFieldValue($fieldHandle)));
+                    $fieldKeywords = normalizeKeywords($fieldType->getSearchKeywords($entry->getFieldValue($fieldHandle)));
                     $keywords = array_merge($keywords, array_filter(preg_split('/[\s\n\r]/', $fieldKeywords)));
 
                     // Out of room?
@@ -85,7 +91,7 @@ abstract class AppleNewsHelper
      *
      * @return string Text without HTML tags
      */
-    public static function stripHtml($html)
+    public static function stripHtml($html): string
     {
         if ($html instanceof RichTextData) {
             $html = $html->getParsedContent();
@@ -116,7 +122,7 @@ abstract class AppleNewsHelper
      *
      * @return string Markdown-formatted text
      */
-    public static function html2Markdown($html)
+    public static function html2Markdown($html): string
     {
         if ($html instanceof RichTextData) {
             $html = $html->getParsedContent();
@@ -149,7 +155,7 @@ abstract class AppleNewsHelper
      * @return array Component definitions
      * @todo Add support for images + captions and videos
      */
-    public static function html2Components($html, $properties = [])
+    public static function html2Components($html, $properties = []): array
     {
         if ($html instanceof RichTextData) {
             $html = $html->getParsedContent();
