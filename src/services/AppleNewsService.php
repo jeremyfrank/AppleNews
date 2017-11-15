@@ -9,6 +9,7 @@ use craft\applenews\Plugin;
 use craft\applenews\records\AppleNews_ArticleRecord;
 use craft\applenews\tasks\AppleNews_PostQueuedArticlesJob;
 
+use craft\db\Query;
 use craft\elements\Entry;
 use yii\base\Component;
 use yii\base\Exception;
@@ -183,7 +184,7 @@ class AppleNewsService extends Component
      *
      * @return bool Whether the entry can be published to any channels
      */
-    public function canPostArticle(Entry $entry)
+    public function canPostArticle(Entry $entry): bool
     {
         // See if any channels will have it
         foreach ($this->getChannels() as $channel) {
@@ -219,10 +220,13 @@ class AppleNewsService extends Component
 
         if ($channelIds) {
             foreach ($channelIds as $channelId) {
-                $result = \Craft::$app->db->createCommand()
-                    ->upsert('{{%applenews_articlequeue}}', 'entryId')
-                    ->upsert('{{%applenews_articlequeue}}', 'locale')
-                    ->upsert('{{%applenews_articlequeue}}', 'channelId')
+                $channelId = Craft::$app->getDb()->createCommand()
+                    ->upsert(
+                        '{{%applenews_articlequeue}}',
+                        $entry->id,
+                        $entry->locale,
+                        $channelId,
+                        false)
                     ->execute();
 
                 // Create a PostQueuedArticles task
@@ -260,7 +264,7 @@ class AppleNewsService extends Component
 
     public function getQueuedChannelIdsForEntry(Entry $entry, $channelId = null): string
     {
-        $queuedChannelQuery = Craft::$app->db->createCommand()
+        $queuedChannelQuery = (new Query())
             ->select('channelId')
             ->from('applenews_articlequeue')
             ->where('entryId = :entryId', [':entryId' => $entry->id]);
@@ -273,7 +277,7 @@ class AppleNewsService extends Component
             }
         }
 
-        return $queuedChannelQuery->queryColumn();
+        return $queuedChannelQuery->column();
     }
 
     /**

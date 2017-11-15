@@ -25,9 +25,13 @@ class Asset extends AssetBundle
     public function init()
     {
         // define the path that your publishable resources live
-        $this->sourcePath = __DIR__.'/lib';
+        $this->sourcePath = __DIR__.'/resources';
         // define the relative path to CSS/JS files that should be registered with the page
         // when this asset bundle is registered
+        // define the dependencies
+        $this->depends = [
+            Asset::class,
+        ];
         $this->js = [
             $this->jsFile.$this->dotJs(),
         ];

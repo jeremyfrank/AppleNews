@@ -249,6 +249,7 @@ Garnish.\$doc.ready(function() {
 EOT;
         Craft::$app->getView()->registerJs($js);
 
+
         return $html;
     }
 

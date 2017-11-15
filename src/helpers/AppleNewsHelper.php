@@ -1,13 +1,13 @@
 <?php
 namespace craft\applenews\helpers;
 use craft\base\Field;
-use craft\base\FieldInterface;
 use craft\elements\Entry;
 use craft\fields\data\RichTextData;
-use craft\helpers\StringHelper;
 use craft\models\FieldLayout;
-use craft\services\Fields;
+use craft\helpers\Search;
+
 use League\HTMLToMarkdown\HtmlConverter;
+use yii\helpers\Markdown;
 
 /**
  * Class AppleNewsHelper
@@ -50,34 +50,20 @@ abstract class AppleNewsHelper
     {
         $keywords = [];
 
-        // Find the fields
-        /** @var FieldLayout[] $fields */
-        $fields = [];
-        foreach ($entry->getFieldLayout()->getFields() as $fieldLayoutField) {
-            $field = $fieldLayoutField->getField();
-            $fieldHandle = $field->handle;
-            if (in_array($fieldHandle, $fieldHandles)) {
-                $fields[$fieldHandle] = $field;
-            }
-        }
+        /** @var FieldLayout $fieldLayout */
+        foreach ($fieldLayout->getFields() as $field) {
+            /** @var Field $field */
+            // Set the keywords for the content's site
+            $fieldValue = $entry->getFieldValue($field->handle);
+            // Add the keywords in the order defined by $fieldHandles
+            $fieldSearchKeywords = Search::normalizeKeywords($field->getSearchKeywords($fieldValue, $entry));
+            $searchKeywordsBySiteId[$entry->siteId][$field->id] = $fieldSearchKeywords;
+            $keywords = array_merge($keywords, array_filter(preg_split('/[\s\n\r]/', fieldSearchKeywords)));
 
-        // Add the keywords in the order defined by $fieldHandles
-
-        foreach ($fieldHandles as $fieldHandle) {
-            if (isset($fields[$fieldHandle])) {
-                /** @var Fields[] $fieldType */
-                $fieldType = $fields[$fieldHandle]->getFieldTypes();
-                if ($fieldType) {
-                    $fieldType->element = $entry;
-                    $fieldKeywords = normalizeKeywords($fieldType->getSearchKeywords($entry->getFieldValue($fieldHandle)));
-                    $keywords = array_merge($keywords, array_filter(preg_split('/[\s\n\r]/', $fieldKeywords)));
-
-                    // Out of room?
-                    if (count($keywords) >= 50) {
-                        array_splice($keywords, 50);
-                        break;
-                    }
-                }
+            // Out of room?
+            if (count($keywords) >= 50) {
+                array_splice($keywords, 50);
+                break;
             }
         }
 
@@ -321,7 +307,7 @@ abstract class AppleNewsHelper
     public static function markdown2Components($text, array $properties = []): array
     {
         // Convert Markdown to HTML and run through html2Components()
-        $html = StringHelper::parseMarkdown($text);
+        $html = Markdown::process($text);
 
         return static::html2Components($html, $properties);
     }
