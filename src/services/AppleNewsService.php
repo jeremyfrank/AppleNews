@@ -2,18 +2,15 @@
 
 namespace craft\applenews\services;
 
-use ChapterThree\AppleNewsAPI\PublisherAPI;
 use Craft;
 use craft\applenews\AppleNewsChannelInterface;
 use craft\applenews\Plugin;
 use craft\applenews\records\AppleNews_ArticleRecord;
 use craft\applenews\tasks\AppleNews_PostQueuedArticlesJob;
-
 use craft\db\Query;
 use craft\elements\Entry;
 use yii\base\Component;
 use yii\base\Exception;
-
 use yii\helpers\Json;
 
 
@@ -21,6 +18,10 @@ use yii\helpers\Json;
  * Class AppleNewsService
  *
  * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
+ *
+ * @property \craft\applenews\AppleNewsChannelInterface[]|array $channels
+ * @property \craft\applenews\services\AppleNews_ApiService     $apiService
+ * @property array                                              $generatorMetadata
  */
 class AppleNewsService extends Component
 {
@@ -45,8 +46,6 @@ class AppleNewsService extends Component
      */
     public function init()
     {
-
-
         // Set the applenewschannels alias
         defined('APPLE_NEWS_CHANELS_PATH') || define('APPLE_NEWS_CHANELS_PATH', CRAFT_BASE_PATH.'applenewschannels/');
         Craft::setAlias('applenewschannels', APPLE_NEWS_CHANELS_PATH);
@@ -134,7 +133,7 @@ class AppleNewsService extends Component
         if ($channelId !== null) {
             $attributes['channelId'] = $channelId;
         }
-        $records = AppleNews_ArticleRecord::model()->findAllByAttributes($attributes);
+        $records = AppleNews_ArticleRecord::findAll($attributes);
 
         $infos = [];
 
@@ -146,7 +145,7 @@ class AppleNewsService extends Component
                 ])
             ) {
                 $response = $this->getApiService()->readArticle($record->channelId, $record->articleId);
-                if (isset($response->data)) {
+                if ($response->data !== null) {
                     $this->updateArticleRecord($record, $response);
                 }
             }
@@ -164,12 +163,12 @@ class AppleNewsService extends Component
         // Merge in any queue info
         $queuedChannels = $this->getQueuedChannelIdsForEntry($entry, $channelId);
 
-        foreach ($queuedChannels as $channelId) {
+        foreach ($queuedChannels as $queuedChannelId) {
             // Does an article already exist for this channel?
-            if (isset($infos[$channelId])) {
-                $infos[$channelId]['state'] = 'QUEUED_UPDATE';
+            if (isset($infos[$queuedChannelId])) {
+                $infos[$queuedChannelId]['state'] = 'QUEUED_UPDATE';
             } else {
-                $infos[$channelId]['state'] = 'QUEUED';
+                $infos[$queuedChannelId]['state'] = 'QUEUED';
             }
         }
 
@@ -180,7 +179,6 @@ class AppleNewsService extends Component
      * Returns whether any channels can publish the given entry.
      *
      * @param Entry                $entry
-     * @param string|string[]|null $channelId The channel ID(s) to post the article to, if not all
      *
      * @return bool Whether the entry can be published to any channels
      */
@@ -220,7 +218,7 @@ class AppleNewsService extends Component
 
         if ($channelIds) {
             foreach ($channelIds as $channelId) {
-                $channelId = Craft::$app->getDb()->createCommand()
+                Craft::$app->getDb()->createCommand()
                     ->upsert(
                         '{{%applenews_articlequeue}}',
                         $entry->id,
@@ -229,14 +227,14 @@ class AppleNewsService extends Component
                         false)
                     ->execute();
 
-                // Create a PostQueuedArticles task
+                // Create a PostQueuedArticles job
                 $this->createPostQueuedArticlesJob();
 
                 return true;
             }
-        } else {
-            return false;
         }
+
+        return false;
     }
 
 
@@ -262,7 +260,7 @@ class AppleNewsService extends Component
      * @return string[]
      */
 
-    public function getQueuedChannelIdsForEntry(Entry $entry, $channelId = null): string
+    public function getQueuedChannelIdsForEntry(Entry $entry, $channelId = null): array
     {
         $queuedChannelQuery = (new Query())
             ->select('channelId')
@@ -288,7 +286,7 @@ class AppleNewsService extends Component
      *
      * @return bool Whether the entry was posted to Apple News successfully
      */
-    public function postArticle(Entry $entry, $channelId = null)
+    public function postArticle(Entry $entry, $channelId = null): bool
     {
         if (is_string($channelId)) {
             $channelId = [$channelId];
@@ -347,7 +345,7 @@ class AppleNewsService extends Component
                 $response = $this->getApiService()->createArticle($channelId, $data);
             }
 
-            if (isset($response->data)) {
+            if ($response->data !== null) {
                 // Save a record of the article
                 if ($articleExists) {
                     $record = $articleRecords[$channelId];
@@ -383,7 +381,7 @@ class AppleNewsService extends Component
      *
      * @return void
      */
-    public function deleteArticle(Entry $entry)
+    public function deleteArticle(Entry $entry): void
     {
         $articleRecords = $this->getArticleRecordsForEntry($entry);
         $this->deleteArticlesFromRecords($articleRecords);
@@ -397,7 +395,7 @@ class AppleNewsService extends Component
      *
      * @return AppleNews_ApiService
      */
-    protected function getApiService()
+    protected function getApiService(): AppleNews_ApiService
     {
         return Plugin::getInstance()->appleNewsApiService;
     }
@@ -410,9 +408,9 @@ class AppleNewsService extends Component
      *
      * @return AppleNews_ArticleRecord[]
      */
-    protected function getArticleRecordsForEntry(Entry $entry)
+    protected function getArticleRecordsForEntry(Entry $entry): array
     {
-        $records = AppleNews_ArticleRecord::model()->findAllByAttributes([
+        $records = AppleNews_ArticleRecord::findAll([
             'entryId' => $entry->id
         ]);
 
@@ -433,7 +431,7 @@ class AppleNewsService extends Component
      *
      * @return void
      */
-    protected function deleteArticlesFromRecords($records)
+    protected function deleteArticlesFromRecords($records): void
     {
         $apiService = $this->getApiService();
         foreach ($records as $channelId => $record) {

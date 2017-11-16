@@ -41,4 +41,15 @@ class AppleNews_ArticleQueueRecord extends ActiveRecord
         return $this->hasOne(Entry::class,['id' => 'entryId']);
     }
 
+    /**
+     * Returns static class instance, which can be used to obtain meta information.
+     *
+     * @param bool $refresh whether to re-create static instance even, if it is already cached.
+     *
+     * @return static class instance.
+     */
+    public static function instance($refresh = false)
+    {
+        return new self();
+    }
 }

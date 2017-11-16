@@ -36,7 +36,7 @@ abstract class BaseAppleNewsChannel implements AppleNewsChannelInterface
     /**
      * @inheritdoc
      */
-    public function getChannelId()
+    public function getChannelId(): string
     {
         return $this->channelId;
     }
@@ -44,7 +44,7 @@ abstract class BaseAppleNewsChannel implements AppleNewsChannelInterface
     /**
      * @inheritdoc
      */
-    public function getApiKeyId()
+    public function getApiKeyId(): string
     {
         return $this->apiKeyId;
     }
@@ -52,7 +52,7 @@ abstract class BaseAppleNewsChannel implements AppleNewsChannelInterface
     /**
      * @inheritdoc
      */
-    public function getApiSecret()
+    public function getApiSecret(): string
     {
         return $this->apiSecret;
     }
@@ -60,7 +60,7 @@ abstract class BaseAppleNewsChannel implements AppleNewsChannelInterface
     /**
      * @inheritdoc
      */
-    public function matchEntry(Entry $entry)
+    public function matchEntry(Entry $entry): bool
     {
         return true;
     }
@@ -68,7 +68,7 @@ abstract class BaseAppleNewsChannel implements AppleNewsChannelInterface
     /**
      * @inheritdoc
      */
-    public function canPublish(Entry $entry)
+    public function canPublish(Entry $entry): bool
     {
         if ($entry->getStatus() != Entry::LIVE) {
             return false;

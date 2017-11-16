@@ -46,7 +46,7 @@ abstract class AppleNewsHelper
      *
      * @return string[] List of keywords for the article
      */
-    public static function createKeywords(Entry $entry, $fieldHandles): string
+    public static function createKeywords(Entry $entry): string
     {
         $keywords = [];
 

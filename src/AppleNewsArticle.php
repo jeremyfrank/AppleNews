@@ -3,7 +3,6 @@ namespace craft\applenews;
 
 use craft\base\Element;
 use\craft\elements\Asset;
-use craft\helpers\FileHelper;
 
 /**
  * Class AppleNewsArticle
@@ -59,7 +58,7 @@ class AppleNewsArticle implements AppleNewsArticleInterface
     /**
      * @inheritdoc
      */
-    public function getFiles()
+    public function getFiles(): array
     {
         return $this->files;
     }
@@ -106,7 +105,7 @@ class AppleNewsArticle implements AppleNewsArticleInterface
     /**
      * @inheritdoc
      */
-    public function getMetadata()
+    public function getMetadata(): array
     {
         return $this->metadata;
     }
@@ -151,7 +150,7 @@ class AppleNewsArticle implements AppleNewsArticleInterface
     /**
      * @inheritdoc
      */
-    public function getContent()
+    public function getContent(): array
     {
         return $this->content;
     }

@@ -18,13 +18,6 @@ use craft\applenews\models\Settings;
 use craft\events\RegisterElementActionsEvent;
 use yii\helpers\Json;
 
-
-/**
- * Class AppleNewsPlugin
- *
- * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
- */
-
 Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function(RegisterUrlRulesEvent $event) {
     $event->rules['apple-news'] = 'appleNews/settings/index';
 });
@@ -33,17 +26,21 @@ Event::on(Entry::class, Element::EVENT_REGISTER_ACTIONS, function(RegisterElemen
     $event->actions[] = AppleNews_PostArticlesElementAction::class;
 });
 
-class Plugin extends craft\base\Plugin
+/**
+ * Class AppleNewsPlugin
+ *
+ * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
+ *
+ * @property \craft\applenews\services\AppleNewsService $service
+ */
+class Plugin extends \craft\base\Plugin
 {
-
-
     /**
      * @return void
      */
-    public function init()
+    public function init(): void
     {
         parent::init();
-
 
         if ($this->getSettings()->autoPublishOnSave) {
             Craft::$app->on('entries.saveEntry', [$this, 'handleEntrySave']);
@@ -59,10 +56,6 @@ class Plugin extends craft\base\Plugin
             'appleNewsService' => AppleNewsService::class,
             'appleNewsApiService' => AppleNews_ApiService::class,
         ]);
-
-
-
-
     }
 
     /**
@@ -227,11 +220,10 @@ class Plugin extends craft\base\Plugin
 
         $html .= '</div>';
 
-
-        Craft::$app->getView()->registerAssetBundle(Asset::class);
-        Craft::$app->getView()->registerCss(Asset::class);
-        Craft::$app->getView()->registerJs(Asset::class);
-
+        $viewService = Craft::$app->getView();
+        $viewService->registerAssetBundle(Asset::class);
+        $viewService->registerCss(Asset::class);
+        $viewService->registerJs(Asset::class);
 
         $infosJs = Json::encode($infos);
         $versionIdJs = $isVersion ? $entry->versionId : 'null';
@@ -247,8 +239,7 @@ Garnish.\$doc.ready(function() {
 		{$infosJs});
 });
 EOT;
-        Craft::$app->getView()->registerJs($js);
-
+        $viewService->registerJs($js);
 
         return $html;
     }
@@ -291,7 +282,7 @@ EOT;
      */
     protected function getService(): AppleNewsService
     {
-        return $this->appleNewsService;
+        return self::getInstance()->appleNewsService;
     }
 
     /**

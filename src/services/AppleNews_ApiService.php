@@ -11,6 +11,8 @@ use yii\base\Component;
  * Class AppleNews_ApiService
  *
  * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
+ *
+ * @property \craft\applenews\services\AppleNewsService $service
  */
 class AppleNews_ApiService extends Component
 {
@@ -24,7 +26,7 @@ class AppleNews_ApiService extends Component
      *
      * @return \stdClass
      */
-    public function readChannel($channelId)
+    public function readChannel($channelId): \stdClass
     {
         return $this->get($channelId, '/channels/{channel_id}', ['channel_id' => $channelId]);
     }
@@ -36,7 +38,7 @@ class AppleNews_ApiService extends Component
      *
      * @return \stdClass[]
      */
-    public function listSections($channelId)
+    public function listSections($channelId): array
     {
         return $this->get($channelId, '/channels/{channel_id}/sections', ['channel_id' => $channelId]);
     }
@@ -49,7 +51,7 @@ class AppleNews_ApiService extends Component
      *
      * @return \stdClass
      */
-    public function readSection($channelId, $sectionId)
+    public function readSection($channelId, $sectionId): \stdClass
     {
         return $this->get($channelId, '/sections/{section_id}', ['section_id' => $sectionId]);
     }
@@ -62,7 +64,7 @@ class AppleNews_ApiService extends Component
      *
      * @return \stdClass
      */
-    public function readArticle($channelId, $articleId)
+    public function readArticle($channelId, $articleId): \stdClass
     {
         return $this->get($channelId, '/articles/{article_id}', ['article_id' => $articleId]);
     }
@@ -75,7 +77,7 @@ class AppleNews_ApiService extends Component
      *
      * @return \stdClass[]
      */
-    public function searchArticles($channelId, $params = [])
+    public function searchArticles($channelId, array $params = []): array
     {
         return $this->get($channelId, '/channels/{channel_id}/articles', ['channel_id' => $channelId], $params);
     }
@@ -88,7 +90,7 @@ class AppleNews_ApiService extends Component
      *
      * @return \stdClass
      */
-    public function createArticle($channelId, $data)
+    public function createArticle($channelId, $data): \stdClass
     {
         return $this->post($channelId, '/channels/{channel_id}/articles', ['channel_id' => $channelId], $data);
     }
@@ -102,7 +104,7 @@ class AppleNews_ApiService extends Component
      *
      * @return \stdClass
      */
-    public function updateArticle($channelId, $articleId, $data)
+    public function updateArticle($channelId, $articleId, $data): \stdClass
     {
         return $this->post($channelId, '/articles/{article_id}', ['article_id' => $articleId], $data);
     }
@@ -115,7 +117,7 @@ class AppleNews_ApiService extends Component
      *
      * @return \stdClass
      */
-    public function deleteArticle($channelId, $articleId)
+    public function deleteArticle($channelId, $articleId): \stdClass
     {
         return $this->delete($channelId, '/articles/{article_id}', ['article_id' => $articleId]);
     }
@@ -133,7 +135,7 @@ class AppleNews_ApiService extends Component
      *
      * @return mixed
      */
-    protected function get($channelId, $path, $pathArgs = [], $data = [])
+    protected function get($channelId, $path, array $pathArgs = [], array $data = [])
     {
         $api = $this->getApi($channelId);
         $response = $api->get($path, $pathArgs, $data);
@@ -151,7 +153,7 @@ class AppleNews_ApiService extends Component
      *
      * @return mixed
      */
-    protected function post($channelId, $path, $pathArgs = [], $data = [])
+    protected function post($channelId, $path, array $pathArgs = [], array $data = [])
     {
         $api = $this->getApi($channelId);
         $response = $api->post($path, $pathArgs, $data);
@@ -169,7 +171,7 @@ class AppleNews_ApiService extends Component
      *
      * @return mixed
      */
-    protected function delete($channelId, $path, $pathArgs = [], $data = [])
+    protected function delete($channelId, $path, array $pathArgs = [], array $data = [])
     {
         $api = $this->getApi($channelId);
         $response = $api->delete($path, $pathArgs, $data);
@@ -184,7 +186,7 @@ class AppleNews_ApiService extends Component
      *
      * @return PublisherAPI
      */
-    protected function getApi($channelId)
+    protected function getApi($channelId): PublisherAPI
     {
         $channel = $this->getService()->getChannelById($channelId);
         $api = new PublisherAPI($channel->getApiKeyId(), $channel->getApiSecret(), 'https://news-api.apple.com');
@@ -197,7 +199,7 @@ class AppleNews_ApiService extends Component
      *
      * @return AppleNewsService
      */
-    protected function getService()
+    protected function getService(): AppleNewsService
     {
         return Plugin::getInstance()->appleNewsService;
     }

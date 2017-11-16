@@ -94,7 +94,7 @@ class AppleNews_SettingsController extends Controller
      * @return Entry
      * @throws HttpException
      */
-    protected function getEntry($acceptRevision = false)
+    protected function getEntry($acceptRevision = false): Entry
     {
         $entryId = Craft::$app->getRequest()->getRequiredParam('entryId');
         $localeId = Craft::$app->getRequest()->getRequiredParam('locale');
@@ -132,7 +132,7 @@ class AppleNews_SettingsController extends Controller
      * @return \array[]
      * @throws Exception
      */
-    protected function getArticleInfo(Entry $entry, $channelId, $refresh = false)
+    protected function getArticleInfo(Entry $entry, $channelId, $refresh = false): array
     {
         $infos = $this->getService()->getArticleInfo($entry, $channelId, true);
 
@@ -148,7 +148,7 @@ class AppleNews_SettingsController extends Controller
     /**
      * @return AppleNewsService
      */
-    protected function getService()
+    protected function getService(): AppleNewsService
     {
         return Plugin::getInstance()->appleNewsService;
     }
@@ -156,7 +156,7 @@ class AppleNews_SettingsController extends Controller
     /**
      * @return AppleNews_ApiService
      */
-    protected function getApiService()
+    protected function getApiService(): AppleNews_ApiService
     {
         return Plugin::getInstance()->appleNewsApiService;
     }
