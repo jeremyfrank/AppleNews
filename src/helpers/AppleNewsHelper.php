@@ -1,5 +1,7 @@
 <?php
+
 namespace craft\applenews\helpers;
+
 use craft\base\Field;
 use craft\elements\Entry;
 use craft\fields\data\RichTextData;
@@ -41,12 +43,11 @@ abstract class AppleNewsHelper
     /**
      * Creates a list of keywords for an article.
      *
-     * @param Entry $entry        The entry
-     * @param string[]   $fieldHandles The field handles that the keywords should be extracted from
+     * @param Entry $entry The entry
      *
      * @return string[] List of keywords for the article
      */
-    public static function createKeywords(Entry $entry): string
+    public static function createKeywords(Entry $entry, $fieldHandles): array
     {
         $keywords = [];
 
@@ -56,14 +57,17 @@ abstract class AppleNewsHelper
             // Set the keywords for the content's site
             $fieldValue = $entry->getFieldValue($field->handle);
             // Add the keywords in the order defined by $fieldHandles
-            $fieldSearchKeywords = Search::normalizeKeywords($field->getSearchKeywords($fieldValue, $entry));
-            $searchKeywordsBySiteId[$entry->siteId][$field->id] = $fieldSearchKeywords;
-            $keywords = array_merge($keywords, array_filter(preg_split('/[\s\n\r]/', fieldSearchKeywords)));
+            foreach ($fieldHandles as $fieldHandle) {
+                $fieldHandle = $field->handle;
+                $fieldSearchKeywords = Search::normalizeKeywords($field->getSearchKeywords($fieldValue, $entry));
+                $searchKeywordsBySiteId[$entry->siteId][$field->id] = $fieldSearchKeywords;
+                $keywords = array_merge($keywords, array_filter(preg_split('/[\s\n\r]/', fieldSearchKeywords)));
 
-            // Out of room?
-            if (count($keywords) >= 50) {
-                array_splice($keywords, 50);
-                break;
+                // Out of room?
+                if (count($keywords) >= 50) {
+                    array_splice($keywords, 50);
+                    break;
+                }
             }
         }
 

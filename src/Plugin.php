@@ -31,7 +31,7 @@ Event::on(Entry::class, Element::EVENT_REGISTER_ACTIONS, function(RegisterElemen
  *
  * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
  *
- * @property \craft\applenews\services\AppleNewsService $service
+ * @property AppleNewsService $service
  */
 class Plugin extends \craft\base\Plugin
 {

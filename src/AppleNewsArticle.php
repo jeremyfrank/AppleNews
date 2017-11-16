@@ -74,7 +74,7 @@ class AppleNewsArticle implements AppleNewsArticleInterface
     /**
      * Adds a new file to the article and returns its URL.
      *
-     * @param AssetFileModel|string $file An {@link AssetFileModel} or a path to a file
+     * @param Asset|string $file An {@link Asset} or a path to a file
      *
      * @return string The URL that the article should use to reference the file
      */
@@ -126,7 +126,7 @@ class AppleNewsArticle implements AppleNewsArticleInterface
      */
     public function addMetadata($name, $value)
     {
-        if (!isset($this->metadata)) {
+        if ($this->metadata === null) {
             $this->metadata = [];
         }
 
