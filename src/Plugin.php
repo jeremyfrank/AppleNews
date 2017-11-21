@@ -17,6 +17,8 @@ use yii\base\Event;
 use craft\applenews\models\Settings;
 use craft\events\RegisterElementActionsEvent;
 use yii\helpers\Json;
+use craft\applenews\controllers\AppleNewsController;
+use craft\applenews\BaseAppleNewsChannel;
 
 Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function(RegisterUrlRulesEvent $event) {
     $event->rules['apple-news'] = 'appleNews/settings/index';
@@ -35,6 +37,14 @@ Event::on(Entry::class, Element::EVENT_REGISTER_ACTIONS, function(RegisterElemen
  */
 class Plugin extends \craft\base\Plugin
 {
+
+    public $hasCpSettings = true;
+
+    /**
+     * @var AppleNewsChannelInterface[] The channels
+     */
+    private $_channels;
+
     /**
      * @return void
      */
@@ -55,6 +65,8 @@ class Plugin extends \craft\base\Plugin
         $this->setComponents([
             'appleNewsService' => AppleNewsService::class,
             'appleNewsApiService' => AppleNews_ApiService::class,
+            'myNewsArticle' => \MyNewsArticle::class,
+            'myNewsChannel' => \MyNewsChannel::class
         ]);
     }
 
@@ -293,4 +305,31 @@ EOT;
         return new Settings();
     }
 
+    /**
+     * @inheritdoc
+     */
+    public function getSettingsResponse()
+    {
+        $channels = $this->getService()->getChannels();
+
+        $channelNames = [];
+        $channelIds = [];
+        foreach ($channels as $channel) {
+            $channelIds[] = $channel->getChannelId();
+            $channelNames[] = $this->getService()->getChannelName($channel->getChannelId());
+        }
+
+
+        /** @var AppleNewsController $controller */
+        $controller = Craft::$app->controller;
+
+        return $controller->renderTemplate('apple-news/_index', [
+            'plugin' => $this,
+            'channels' => $channels,
+            'channelNames' => $channelNames,
+            'channelId' => $channelIds,
+
+
+        ]);
+    }
 }
