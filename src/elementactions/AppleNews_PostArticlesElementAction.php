@@ -7,10 +7,13 @@ use craft\elements\db\ElementQuery;
 use craft\elements\db\ElementQueryInterface;
 use craft\elements\Entry;
 use craft\applenews\services\AppleNewsService;
+
 /**
  * Class AppleNews_PostArticlesElementAction
  *
  * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
+ *
+ * @property string $triggerLabel
  */
 class AppleNews_PostArticlesElementAction extends ElementAction
 {

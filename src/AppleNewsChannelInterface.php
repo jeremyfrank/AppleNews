@@ -17,17 +17,17 @@ interface AppleNewsChannelInterface
     /**
      * @return string The channel ID
      */
-    public function getChannelId();
+    public function getChannelId(): string;
 
     /**
      * @return string The channel API key ID
      */
-    public function getApiKeyId();
+    public function getApiKeyId(): string;
 
     /**
      * @return string The channel API shared secret
      */
-    public function getApiSecret();
+    public function getApiSecret(): string;
 
     /**
      * Determines whether a given entry should be included in the News channel.
@@ -36,7 +36,7 @@ interface AppleNewsChannelInterface
      *
      * @return bool Whether the entry should be included in the News channel
      */
-    public function matchEntry(Entry $entry);
+    public function matchEntry(Entry $entry): bool;
 
     /**
      * Determines whether a given entry should be published to Apple News in its current state.
@@ -45,7 +45,7 @@ interface AppleNewsChannelInterface
      *
      * @return bool Whether the entry should be published to Apple News
      */
-    public function canPublish(Entry $entry);
+    public function canPublish(Entry $entry): bool;
 
     /**
      * Creates an {@link AppleNewsArticleInterface} for the given entry
@@ -54,5 +54,5 @@ interface AppleNewsChannelInterface
      *
      * @return AppleNewsArticleInterface The article that represents the entry
      */
-    public function createArticle(Entry $entry);
+    public function createArticle(Entry $entry): AppleNewsArticleInterface;
 }

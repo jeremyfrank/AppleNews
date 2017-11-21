@@ -32,7 +32,7 @@ class AppleNews_SettingsController extends Controller
     }
 
     /**
-     * Settnigs index
+     * Settings index
      */
     public function actionIndex()
     {
@@ -96,20 +96,23 @@ class AppleNews_SettingsController extends Controller
      */
     protected function getEntry($acceptRevision = false): Entry
     {
-        $entryId = Craft::$app->getRequest()->getRequiredParam('entryId');
-        $localeId = Craft::$app->getRequest()->getRequiredParam('locale');
+        $requestService = Craft::$app->getRequest();
+        $entryRevisionsService = Craft::$app->getEntryRevisions();
+
+        $entryId = $requestService->getRequiredParam('entryId');
+        $localeId = $requestService->getRequiredParam('locale');
 
         if ($acceptRevision) {
-            $versionId = Craft::$app->getRequest()->getRequiredParam('versionId');
-            $draftId = Craft::$app->getRequest()->getRequiredParam('draftId');
+            $versionId = $requestService->getRequiredParam('versionId');
+            $draftId = $requestService->getRequiredParam('draftId');
         } else {
             $versionId = $draftId = null;
         }
 
         if ($versionId) {
-            $entry = Craft::$app->getEntryRevisions()->getVersionById($versionId);
+            $entry = $entryRevisionsService->getVersionById($versionId);
         } elseif ($draftId) {
-            $entry = Craft::$app->getEntryRevisions()->getDraftById($draftId);
+            $entry = $entryRevisionsService->getDraftById($draftId);
         } else {
             $entry = Craft::$app->getEntries()->getEntryById($entryId, $localeId);
         }

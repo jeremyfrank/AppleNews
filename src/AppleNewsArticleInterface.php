@@ -23,7 +23,7 @@ interface AppleNewsArticleInterface
      *
      * @return array The article content
      */
-    public function getContent();
+    public function getContent(): array;
 
     /**
      * Returns the files that are included in the article.
@@ -34,7 +34,7 @@ interface AppleNewsArticleInterface
      *
      * @return string[]|Asset[]|null The files that are included in the article
      */
-    public function getFiles();
+    public function getFiles(): array;
 
     /**
      * Returns metadata about the article.
@@ -43,5 +43,5 @@ interface AppleNewsArticleInterface
      *
      * @return array|null Metadata about the article
      */
-    public function getMetadata();
+    public function getMetadata(): array;
 }
