@@ -17,7 +17,7 @@ use craft\elements\Entry;
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since  3.0
  */
-class AppleNews_ArticleQueueRecord extends ActiveRecord
+class AppleNews_ArticleQueue extends ActiveRecord
 {
     // Public Methods
     // =========================================================================

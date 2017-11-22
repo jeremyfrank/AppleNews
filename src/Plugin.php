@@ -131,7 +131,7 @@ class Plugin extends \craft\base\Plugin
         $isDraft = ($entry instanceof EntryDraft);
 
         // Get any existing records for these channels.
-        $infos = $this->getService()->getArticleInfo($entry, array_keys($channels));
+       $infos = $this->getService()->getArticleInfo($entry, array_keys($channels));
 
         $html = '<div class="pane lightpane meta" id="apple-news-pane">'.
             '<h4 class="heading">'.Craft::t('apple-news', 'Apple News Channels').'</h4>'.

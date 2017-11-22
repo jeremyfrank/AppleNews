@@ -5,7 +5,7 @@ namespace craft\applenews\services;
 use Craft;
 use craft\applenews\AppleNewsChannelInterface;
 use craft\applenews\Plugin;
-use craft\applenews\records\AppleNews_ArticleRecord;
+use craft\applenews\records\AppleNews_Article;
 use craft\applenews\tasks\AppleNews_PostQueuedArticlesJob;
 use craft\db\Query;
 use craft\elements\Entry;
@@ -134,7 +134,7 @@ class AppleNewsService extends Component
         if ($channelId !== null) {
             $attributes['channelId'] = $channelId;
         }
-        $records = AppleNews_ArticleRecord::findAll($attributes);
+        $records = AppleNews_Article::findAll($attributes);
 
         $infos = [];
 
@@ -351,7 +351,7 @@ class AppleNewsService extends Component
                 if ($articleExists) {
                     $record = $articleRecords[$channelId];
                 } else {
-                    $record = new AppleNews_ArticleRecord();
+                    $record = new AppleNews_Article();
                     $record->entryId = $entry->id;
                     $record->channelId = $channelId;
                     $record->articleId = $response->data->id;
@@ -407,11 +407,11 @@ class AppleNewsService extends Component
      *
      * @param Entry $entry
      *
-     * @return AppleNews_ArticleRecord[]
+     * @return AppleNews_Article[]
      */
     protected function getArticleRecordsForEntry(Entry $entry): array
     {
-        $records = AppleNews_ArticleRecord::findAll([
+        $records = AppleNews_Article::findAll([
             'entryId' => $entry->id
         ]);
 
@@ -428,7 +428,7 @@ class AppleNewsService extends Component
     /**
      * Deletes articles on Apple News based on the given records.
      *
-     * @param AppleNews_ArticleRecord[] $records The article records
+     * @param AppleNews_Article[] $records The article records
      *
      * @return void
      */
@@ -444,10 +444,10 @@ class AppleNewsService extends Component
     /**
      * Updates a given Article record with the data in an Apple News API response.
      *
-     * @param AppleNews_ArticleRecord $record
-     * @param \stdClass               $response
+     * @param AppleNews_Article $record
+     * @param \stdClass         $response
      */
-    protected function updateArticleRecord(AppleNews_ArticleRecord $record, $response)
+    protected function updateArticleRecord(AppleNews_Article $record, $response)
     {
         $record->revisionId = $response->data->revision;
         $record->isSponsored = $response->data->isSponsored;
