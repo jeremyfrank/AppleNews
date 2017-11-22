@@ -1,8 +1,6 @@
 {% extends "_layouts/cp" %}
 
-
     {% set title = "Publish to Apple News"|t %}
-
 
     {% if not currentUser.admin %}
         {% exit 404 %}
@@ -12,6 +10,4 @@
     sections: { label: "Section Info"|t, url: url('apple-news') },
     } %}
 
-    {% set selectedTab = craft.request.getSegment(2) ?? 'sections' %}
-
-
+    {% set selectedTab = craft.app.request.getSegment(2) ?? 'sections' %}

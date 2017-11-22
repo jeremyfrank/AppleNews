@@ -80,7 +80,7 @@ abstract class BaseAppleNewsChannel implements AppleNewsChannelInterface
     /**
      * @inheritdoc
      */
-    public function createArticle(Entry $entry)
+    public function createArticle(Entry $entry): AppleNewsArticleInterface
     {
         throw new Exception('createArticle not implemented');
     }

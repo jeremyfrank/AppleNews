@@ -64,9 +64,7 @@ class Plugin extends \craft\base\Plugin
 
         $this->setComponents([
             'appleNewsService' => AppleNewsService::class,
-            'appleNewsApiService' => AppleNews_ApiService::class,
-            'myNewsArticle' => \MyNewsArticle::class,
-            'myNewsChannel' => \MyNewsChannel::class
+            'appleNewsApiService' => AppleNews_ApiService::class
         ]);
     }
 
@@ -312,24 +310,25 @@ EOT;
     {
         $channels = $this->getService()->getChannels();
 
-        $channelNames = [];
         $channelIds = [];
-        foreach ($channels as $channel) {
-            $channelIds[] = $channel->getChannelId();
-            $channelNames[] = $this->getService()->getChannelName($channel->getChannelId());
-        }
+        $channelNames = [];
+        $sections = [];
 
+        foreach ($channels as $channel) {
+            $channelId = $channel->getChannelId();
+            $channelIds[] = $channelId;
+            $channelNames[$channelId] = $this->getService()->getChannelName($channelId);
+            $sections[$channelId] = Craft::$app->getSections();
+        }
 
         /** @var AppleNewsController $controller */
         $controller = Craft::$app->controller;
 
         return $controller->renderTemplate('apple-news/_index', [
-            'plugin' => $this,
             'channels' => $channels,
             'channelNames' => $channelNames,
             'channelId' => $channelIds,
-
-
+            'sections' => $sections,
         ]);
     }
 }

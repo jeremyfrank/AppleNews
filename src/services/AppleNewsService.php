@@ -12,6 +12,7 @@ use craft\elements\Entry;
 use yii\base\Component;
 use yii\base\Exception;
 use yii\helpers\Json;
+use applenewschannels\MyNewsChannel;
 
 
 /**
@@ -64,7 +65,7 @@ class AppleNewsService extends Component
             $channelConfigs = Plugin::getInstance()->getSettings()->channels;
 
             foreach ($channelConfigs as $config) {
-                $channel = Craft::$app->getComponents($config);
+                $channel = Craft::createObject($config);
 
                 if (!($channel instanceof AppleNewsChannelInterface)) {
                     throw new Exception('All Apple News channels must implement the AppleNewsChannelInterface interface');
