@@ -12,7 +12,6 @@ use craft\elements\Entry;
 use yii\base\Component;
 use yii\base\Exception;
 use yii\helpers\Json;
-use applenewschannels\MyNewsChannel;
 
 
 /**

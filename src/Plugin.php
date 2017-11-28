@@ -18,7 +18,6 @@ use craft\applenews\models\Settings;
 use craft\events\RegisterElementActionsEvent;
 use yii\helpers\Json;
 use craft\applenews\controllers\AppleNewsController;
-use craft\applenews\BaseAppleNewsChannel;
 
 Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function(RegisterUrlRulesEvent $event) {
     $event->rules['apple-news'] = 'appleNews/settings/index';
@@ -39,11 +38,6 @@ class Plugin extends \craft\base\Plugin
 {
 
     public $hasCpSettings = true;
-
-    /**
-     * @var AppleNewsChannelInterface[] The channels
-     */
-    private $_channels;
 
     /**
      * @return void
@@ -231,7 +225,6 @@ class Plugin extends \craft\base\Plugin
         $html .= '</div>';
 
         $viewService = Craft::$app->getView();
-        //$viewService->registerAssetBundle(Asset::class);
         $viewService->registerCss(Asset::class);
         $viewService->registerJs(Asset::class);
 

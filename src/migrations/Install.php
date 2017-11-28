@@ -5,18 +5,29 @@ use craft\db\Migration;
 
 class Install extends Migration
 {
-    public function safeUp()
+    /**
+     * @inheritdoc
+     */
+    public function safeUp(): void
     {
         $this->createTables();
-        $this->createIndex(null, '{{%applenews_articles}}', ['sessionId', 'volumeId']);
-        $this->createIndex(null, '{{%applenews_articlequeue}}', ['volumeId'], false);
+        $this->createIndexes();
     }
 
-    public function safeDown()
+    /**
+     * @inheritdoc
+     */
+    public function safeDown(): bool
     {
-        // ...
+        return true;
     }
-    protected function createTables()
+
+    /**
+     * Creates the tables.
+     *
+     * @return void
+     */
+    protected function createTables(): void
     {
         $this->createTable('{{%apple_news__article}}', [
             'id' => $this->primaryKey(),
@@ -28,21 +39,32 @@ class Install extends Migration
         ]);
         $this->createTable('{{%applenews_articlequeue}}', [
             'id' => $this->primaryKey(),
+            'job' => $this->binary()->notNull(),
+            'description' => $this->text(),
             'entryId' => $this->integer(),
             'channelId' => $this->string(),
-            'job' => $this->string(),
-            'description' => $this->string(100)->notNull()->defaultValue(''),
-            'timePushed' => $this->dateTime(),
-            'ttr' => $this->string(),
-            'delay' => $this->integer(),
-            'priority' => $this->integer(),
+            'timePushed' => $this->integer()->notNull(),
+            'ttr' => $this->integer()->notNull(),
+            'delay' => $this->integer()->defaultValue(0)->notNull(),
+            'priority' => $this->integer()->unsigned()->notNull()->defaultValue(1024),
             'dateReserved' => $this->dateTime(),
-            'timeUpdated' => $this->dateTime(),
-            'progress' => $this->string(),
+            'timeUpdated' => $this->integer(),
+            'progress' => $this->smallInteger()->notNull()->defaultValue(0),
             'attempt' => $this->integer(),
-            'fail' => $this->integer(),
+            'fail' => $this->boolean()->defaultValue(false),
             'dateFailed' => $this->dateTime(),
-            'error' => $this->string(),
+            'error' => $this->text(),
         ]);
+    }
+
+    /**
+     * Creates the indexes.
+     *
+     * @return void
+     */
+    protected function createIndexes(): void
+    {
+        $this->createIndex(null, '{{%apple_news__article}}', ['entryId', 'channelId']);
+        $this->createIndex(null, '{{%applenews_articlequeue}}', ['entryId', 'channelId'], false);
     }
 }

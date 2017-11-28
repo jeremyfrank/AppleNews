@@ -37,7 +37,7 @@ class AppleNews_Article extends ActiveRecord
      */
     public function getTableName(): string
     {
-        return '{{%applenews_articles}}';
+        return '{{%apple_news__article}}';
     }
 
     /**
