@@ -48,8 +48,8 @@ class AppleNewsService extends Component
     public function init()
     {
         // Set the applenewschannels alias
-        defined('APPLE_NEWS_CHANELS_PATH') || define('APPLE_NEWS_CHANELS_PATH', CRAFT_BASE_PATH.'applenewschannels/');
-        Craft::setAlias('applenewschannels', APPLE_NEWS_CHANELS_PATH);
+        defined('APPLE_NEWS_CHANNELS_PATH') || define('APPLE_NEWS_CHANNELS_PATH', CRAFT_BASE_PATH.'applenewschannels/');
+        Craft::setAlias('applenewschannels', APPLE_NEWS_CHANNELS_PATH);
     }
 
     /**
@@ -223,7 +223,7 @@ class AppleNewsService extends Component
                     ->upsert(
                         '{{%applenews_articlequeue}}',
                         $entry->id,
-                        $entry->locale,
+                        $entry->siteId,
                         $channelId,
                         false)
                     ->execute();
@@ -265,7 +265,7 @@ class AppleNewsService extends Component
     {
         $queuedChannelQuery = (new Query())
             ->select('channelId')
-            ->from('applenews_articlequeue')
+            ->from('{{%applenews_articlequeue}}')
             ->where('entryId = :entryId', [':entryId' => $entry->id]);
 
         if ($channelId !== null) {

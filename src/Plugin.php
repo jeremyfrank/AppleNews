@@ -231,7 +231,7 @@ class Plugin extends \craft\base\Plugin
         $html .= '</div>';
 
         $viewService = Craft::$app->getView();
-        $viewService->registerAssetBundle(Asset::class);
+        //$viewService->registerAssetBundle(Asset::class);
         $viewService->registerCss(Asset::class);
         $viewService->registerJs(Asset::class);
 
@@ -243,7 +243,7 @@ class Plugin extends \craft\base\Plugin
 Garnish.\$doc.ready(function() {
 	new Craft.AppleNews.ArticlePane(
 		{$entry->id},
-		'{$entry->locale}',
+		'{$entry->siteId}',
 		{$versionIdJs},
 		{$draftIdJs},
 		{$infosJs});
