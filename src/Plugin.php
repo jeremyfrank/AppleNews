@@ -20,7 +20,7 @@ use yii\helpers\Json;
 use craft\applenews\controllers\AppleNewsController;
 
 Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function(RegisterUrlRulesEvent $event) {
-    $event->rules['apple-news'] = 'appleNews/settings/index';
+    $event->rules['apple-news'] = ['template' => 'apple-news/index'];
 });
 
 Event::on(Entry::class, Element::EVENT_REGISTER_ACTIONS, function(RegisterElementActionsEvent $event) {
@@ -125,7 +125,7 @@ class Plugin extends \craft\base\Plugin
         $isDraft = ($entry instanceof EntryDraft);
 
         // Get any existing records for these channels.
-       $infos = $this->getService()->getArticleInfo($entry, array_keys($channels));
+        $infos = $this->getService()->getArticleInfo($entry, array_keys($channels));
 
         $html = '<div class="pane lightpane meta" id="apple-news-pane">'.
             '<h4 class="heading">'.Craft::t('apple-news', 'Apple News Channels').'</h4>'.
@@ -225,8 +225,8 @@ class Plugin extends \craft\base\Plugin
         $html .= '</div>';
 
         $viewService = Craft::$app->getView();
+        $viewService->registerAssetBundle(Asset::class);
         $viewService->registerCss(Asset::class);
-        $viewService->registerJs(Asset::class);
 
         $infosJs = Json::encode($infos);
         $versionIdJs = $isVersion ? $entry->versionId : 'null';

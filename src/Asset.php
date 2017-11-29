@@ -5,11 +5,9 @@
  * @license   https://craftcms.com/license
  */
 
-
 namespace craft\applenews;
 
 use craft\web\AssetBundle;
-
 
 class Asset extends AssetBundle
 {
@@ -29,9 +27,6 @@ class Asset extends AssetBundle
         // define the relative path to CSS/JS files that should be registered with the page
         // when this asset bundle is registered
         // define the dependencies
-        $this->depends = [
-            Asset::class,
-        ];
         $this->js = [
             $this->jsFile.$this->dotJs(),
         ];
