@@ -17,14 +17,14 @@ use yii\base\Event;
 use craft\applenews\models\Settings;
 use craft\events\RegisterElementActionsEvent;
 use yii\helpers\Json;
-use craft\applenews\controllers\AppleNewsController;
+use craft\applenews\controllers\ArticleController;
 
 Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function(RegisterUrlRulesEvent $event) {
     $event->rules['apple-news'] = ['template' => 'apple-news/index'];
 });
 
 Event::on(Entry::class, Element::EVENT_REGISTER_ACTIONS, function(RegisterElementActionsEvent $event) {
-    $event->actions[] = AppleNews_PostArticlesElementAction::class;
+   // $event->actions[] = DefaultController::class;
 });
 
 /**
@@ -213,7 +213,7 @@ class Plugin extends \craft\base\Plugin
                 $downloadUrlParams['draftId'] = $entry->draftId;
             }
 
-            $downloadUrl = UrlHelper::actionUrl('appleNews/downloadArticle', $downloadUrlParams);
+            $downloadUrl = UrlHelper::actionUrl('apple-news/article/download-article', $downloadUrlParams);
 
             $html .= '<li><a href="'.$downloadUrl.'" target="_blank">'.Craft::t('apple-news', 'Download for News Preview').'</a></li>'.
                 '</ul>'.
@@ -314,7 +314,7 @@ EOT;
             $sections[$channelId] = Craft::$app->getSections();
         }
 
-        /** @var AppleNewsController $controller */
+        /** @var ArticleController $controller */
         $controller = Craft::$app->controller;
 
         return $controller->renderTemplate('apple-news/_index', [

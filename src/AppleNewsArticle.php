@@ -3,6 +3,7 @@ namespace craft\applenews;
 
 use craft\base\Element;
 use\craft\elements\Asset;
+use craft\elements\Entry;
 
 /**
  * Class AppleNewsArticle
@@ -42,7 +43,7 @@ class AppleNewsArticle implements AppleNewsArticleInterface
      *
      * @param Element $entry
      */
-    public function __construct(Element $entry = null)
+    public function __construct(Entry $entry = null)
     {
         $this->entry = $entry;
         $this->init();
