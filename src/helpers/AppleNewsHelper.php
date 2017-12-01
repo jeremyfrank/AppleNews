@@ -2,12 +2,12 @@
 
 namespace craft\applenews\helpers;
 
+use Craft;
 use craft\base\Field;
 use craft\elements\Entry;
 use craft\fields\data\RichTextData;
 use craft\models\FieldLayout;
 use craft\helpers\Search;
-
 use League\HTMLToMarkdown\HtmlConverter;
 use yii\helpers\Markdown;
 
@@ -52,16 +52,17 @@ abstract class AppleNewsHelper
         $keywords = [];
 
         /** @var FieldLayout $fieldLayout */
-        foreach ($fieldLayout->getFields() as $field) {
+        $fieldLayout = $entry->getFieldLayout()->getFields();
+        foreach ($fieldLayout as $field) {
             /** @var Field $field */
             // Set the keywords for the content's site
             $fieldValue = $entry->getFieldValue($field->handle);
             // Add the keywords in the order defined by $fieldHandles
             foreach ($fieldHandles as $fieldHandle) {
-                $fieldHandle = $field->handle;
+                $field->handle = $fieldHandle;
                 $fieldSearchKeywords = Search::normalizeKeywords($field->getSearchKeywords($fieldValue, $entry));
                 $searchKeywordsBySiteId[$entry->siteId][$field->id] = $fieldSearchKeywords;
-                $keywords = array_merge($keywords, array_filter(preg_split('/[\s\n\r]/', fieldSearchKeywords)));
+                $keywords = array_merge($keywords, array_filter(preg_split('/[\s\n\r]/', $fieldSearchKeywords)));
 
                 // Out of room?
                 if (count($keywords) >= 50) {

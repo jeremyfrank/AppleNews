@@ -1,6 +1,6 @@
 <?php
 
-namespace craft\applenews\tasks;
+namespace craft\applenews\jobs;
 
 use Craft;
 use craft\applenews\Plugin;

@@ -1,6 +1,7 @@
 <?php
 
 namespace craft\applenews\controllers;
+
 use Composer\Package\Archiver\ZipArchiver;
 use Craft;
 use craft\applenews\Plugin;
@@ -12,6 +13,7 @@ use craft\web\Controller;
 use yii\base\Exception;
 use yii\helpers\Json;
 use yii\web\HttpException;
+use ZipArchive;
 
 /**
  * Class DefaultController
@@ -40,10 +42,10 @@ class ArticleController extends Controller
         $article = $channel->createArticle($entry);
 
         // Prep the zip staging folder
-        $zipDir = Craft::$app->getPath()->getTempPath().StringHelper::UUID();
+        $zipPath = Craft::$app->getPath()->getTempPath().'/'.StringHelper::UUID();
 
-        $zipContentDir = $zipDir.'/'.$entry->slug;
-        FileHelper::createDirectory($zipDir);
+        $zipContentDir = $zipPath.'/'.$entry->slug;
+        FileHelper::createDirectory($zipPath);
         FileHelper::createDirectory($zipContentDir);
 
         // Create article.json
@@ -58,18 +60,19 @@ class ArticleController extends Controller
             }
         }
 
-        $zipFile = $zipDir.'.zip';
-        touch($zipFile);
+        $archiver = new ZipArchive();
+        $zip = $zipPath.'.zip';
+        $archiver->open($zip, ZipArchive::CREATE);
+        $archiver->addFile($zip);
+        $archiver->close();
 
-        ZipArchiver::archive($zipFile, $zipDir, $zipDir);
-
-        Craft::$app->getResponse()->sendFile($zipFile, file_get_contents($zipFile), [
+        Craft::$app->getResponse()->sendFile($zipPath, file_get_contents($zip), [
             'filename' => $entry->slug.'.zip',
             'forceDownload' => true
-        ], false);
+        ]);
 
-        FileHelper::clearDirectory($zipDir);
-        FileHelper::removeFile($zipFile);
+        FileHelper::clearDirectory($zipPath);
+        FileHelper::removeFile($zip);
     }
 
     /**

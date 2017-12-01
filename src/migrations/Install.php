@@ -39,21 +39,8 @@ class Install extends Migration
         ]);
         $this->createTable('{{%applenews_articlequeue}}', [
             'id' => $this->primaryKey(),
-            'job' => $this->binary()->notNull(),
-            'description' => $this->text(),
             'entryId' => $this->integer(),
             'channelId' => $this->string(),
-            'timePushed' => $this->integer()->notNull(),
-            'ttr' => $this->integer()->notNull(),
-            'delay' => $this->integer()->defaultValue(0)->notNull(),
-            'priority' => $this->integer()->unsigned()->notNull()->defaultValue(1024),
-            'dateReserved' => $this->dateTime(),
-            'timeUpdated' => $this->integer(),
-            'progress' => $this->smallInteger()->notNull()->defaultValue(0),
-            'attempt' => $this->integer(),
-            'fail' => $this->boolean()->defaultValue(false),
-            'dateFailed' => $this->dateTime(),
-            'error' => $this->text(),
         ]);
     }
 

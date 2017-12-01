@@ -6,13 +6,12 @@ use Craft;
 use craft\applenews\AppleNewsChannelInterface;
 use craft\applenews\Plugin;
 use craft\applenews\records\AppleNews_Article;
-use craft\applenews\tasks\AppleNews_PostQueuedArticlesJob;
+use craft\applenews\jobs\AppleNews_PostQueuedArticlesJob;
 use craft\db\Query;
 use craft\elements\Entry;
 use yii\base\Component;
 use yii\base\Exception;
 use yii\helpers\Json;
-
 
 /**
  * Class AppleNewsService
@@ -217,21 +216,26 @@ class AppleNewsService extends Component
         }
 
         if ($channelIds) {
+
             foreach ($channelIds as $channelId) {
-                Craft::$app->getDb()->createCommand()
-                    ->upsert(
-                        '{{%applenews_articlequeue}}',
-                        $entry->id,
-                        $entry->siteId,
-                        $channelId,
-                        false)
-                    ->execute();
-
-                // Create a PostQueuedArticles job
-                $this->createPostQueuedArticlesJob();
-
-                return true;
+                $row = [
+                    'entryId' => $entry->id,
+                    'channelId' => $channelId,
+                ];
             }
+
+            Craft::$app->getDb()->createCommand()
+                ->upsert(
+                    '{{%applenews_articlequeue}}',
+                    $row,
+                    $row,
+                    false)
+                ->execute();
+
+            // Create a PostQueuedArticles job
+            $this->createPostQueuedArticlesJob();
+
+            return true;
         }
 
         return false;
@@ -247,7 +251,7 @@ class AppleNewsService extends Component
     {
         Craft::$app->queue->push(new AppleNews_PostQueuedArticlesJob([
             'description' => 'Custom description',
-            'mySetting' => 'value',
+            //'mySetting' => 'value',
         ]));
     }
 

@@ -59,7 +59,7 @@ class AppleNewsArticle implements AppleNewsArticleInterface
     /**
      * @inheritdoc
      */
-    public function getFiles(): array
+    public function getFiles()
     {
         return $this->files;
     }
@@ -106,7 +106,7 @@ class AppleNewsArticle implements AppleNewsArticleInterface
     /**
      * @inheritdoc
      */
-    public function getMetadata(): array
+    public function getMetadata()
     {
         return $this->metadata;
     }
@@ -151,7 +151,7 @@ class AppleNewsArticle implements AppleNewsArticleInterface
     /**
      * @inheritdoc
      */
-    public function getContent(): array
+    public function getContent()
     {
         return $this->content;
     }
