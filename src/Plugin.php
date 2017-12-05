@@ -24,7 +24,7 @@ Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function(R
 });
 
 Event::on(Entry::class, Element::EVENT_REGISTER_ACTIONS, function(RegisterElementActionsEvent $event) {
-    // $event->actions[] = DefaultController::class;
+     $event->actions[] = AppleNews_PostArticlesElementAction::class;
 });
 
 /**

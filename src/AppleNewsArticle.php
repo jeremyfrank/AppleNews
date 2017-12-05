@@ -46,7 +46,6 @@ class AppleNewsArticle implements AppleNewsArticleInterface
     public function __construct(Entry $entry = null)
     {
         $this->entry = $entry;
-        $this->init();
     }
 
     /**
@@ -54,6 +53,7 @@ class AppleNewsArticle implements AppleNewsArticleInterface
      */
     public function init()
     {
+        parent::init();
     }
 
     /**

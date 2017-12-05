@@ -10,6 +10,8 @@ use craft\applenews\services\AppleNewsService;
 use craft\helpers\FileHelper;
 use craft\helpers\StringHelper;
 use craft\web\Controller;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use yii\base\Exception;
 use yii\helpers\Json;
 use yii\web\HttpException;
@@ -45,6 +47,7 @@ class ArticleController extends Controller
         $zipPath = Craft::$app->getPath()->getTempPath().'/'.StringHelper::UUID();
 
         $zipContentDir = $zipPath.'/'.$entry->slug;
+
         FileHelper::createDirectory($zipPath);
         FileHelper::createDirectory($zipContentDir);
 
@@ -52,27 +55,41 @@ class ArticleController extends Controller
         $json = Json::encode($article->getContent());
         FileHelper::writeToFile($zipContentDir.'/article.json', $json);
 
-        // Copy the files
-        $files = $article->getFiles();
-        if ($files) {
-            foreach ($files as $uri => $path) {
-                copy($path, $zipContentDir.'/'.$uri);
-            }
-        }
-
         $archiver = new ZipArchive();
         $zip = $zipPath.'.zip';
         $archiver->open($zip, ZipArchive::CREATE);
-        $archiver->addFile($zip);
-        $archiver->close();
 
-        Craft::$app->getResponse()->sendFile($zipPath, file_get_contents($zip), [
-            'filename' => $entry->slug.'.zip',
-            'forceDownload' => true
-        ]);
 
-        FileHelper::clearDirectory($zipPath);
+        $files = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($zipPath),
+            RecursiveIteratorIterator::LEAVES_ONLY
+        );
+
+        foreach ($files as $name => $file)
+        {
+            // Skip directories (they would be added automatically)
+            if (!$file->isDir())
+            {
+                // Get real and relative path for current file
+                $filePath = $file->getRealPath();
+                $relativePath = substr($filePath, strlen($zipPath) + 1);
+
+                // Add current file to archive
+                $archiver->addFile($filePath, $relativePath);
+            }
+        }
+
+
+        Craft::$app->getResponse()->sendFile($zipPath);
+
+
+
+
+
+        FileHelper::clearDirectory($zip);
         FileHelper::removeFile($zip);
+
+        return $this->redirectToPostedUrl();
     }
 
     /**
@@ -135,8 +152,6 @@ class ArticleController extends Controller
             $entry = $entryRevisionsService->getDraftById($draftId);
         } else {
             $entry = Craft::$app->getEntries()->getEntryById($entryId, $siteId);
-
-
         }
 
         if (!$entry) {
@@ -150,9 +165,9 @@ class ArticleController extends Controller
     }
 
     /**
-     * @param Entry $entry
-     * @param string     $channelId
-     * @param bool       $refresh
+     * @param Entry  $entry
+     * @param string $channelId
+     * @param bool   $refresh
      *
      * @return \array[]
      * @throws Exception
