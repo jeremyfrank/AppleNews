@@ -48,8 +48,8 @@ class ArticleController extends Controller
 
         $zipContentDir = $zipPath.'/'.$entry->slug;
 
-        FileHelper::createDirectory($zipPath);
-        FileHelper::createDirectory($zipContentDir);
+       // FileHelper::createDirectory($zipPath);
+       // FileHelper::createDirectory($zipContentDir);
 
         // Create article.json
         $json = Json::encode($article->getContent());
@@ -57,7 +57,7 @@ class ArticleController extends Controller
 
         $archiver = new ZipArchive();
         $zip = $zipPath.'.zip';
-        $archiver->open($zip, ZipArchive::CREATE);
+        $open = $archiver->open($zip, ZipArchive::CREATE);
 
 
         $files = new RecursiveIteratorIterator(
@@ -78,16 +78,15 @@ class ArticleController extends Controller
                 $archiver->addFile($filePath, $relativePath);
             }
         }
+        $archiver->close();
 
+        Craft::$app->getResponse()->sendFile($zip,$entry->slug.'.zip');
+        Craft::$app->getResponse()->send();
 
-        Craft::$app->getResponse()->sendFile($zipPath);
-
-
-
-
-
-        FileHelper::clearDirectory($zip);
+        FileHelper::clearDirectory($zipPath);
+        FileHelper::removeDirectory($zipPath);
         FileHelper::removeFile($zip);
+
 
         return $this->redirectToPostedUrl();
     }
@@ -97,8 +96,9 @@ class ArticleController extends Controller
      */
     public function actionGetArticleInfo()
     {
-        $entry = $this->getEntry();
+        $entry = $this->getEntry(true);
         $channelId = Craft::$app->getRequest()->getParam('channelId');
+
 
         return $this->asJson([
             'infos' => $this->getArticleInfo($entry, $channelId, true),

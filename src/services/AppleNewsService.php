@@ -250,8 +250,7 @@ class AppleNewsService extends Component
     public function createPostQueuedArticlesJob(): void
     {
         Craft::$app->queue->push(new AppleNews_PostQueuedArticlesJob([
-            'description' => 'Custom description',
-            //'mySetting' => 'value',
+            'description' => 'Publishing to Apple News',
         ]));
     }
 
