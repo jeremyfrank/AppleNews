@@ -51,7 +51,7 @@ class Plugin extends \craft\base\Plugin
         }
 
         Craft::$app->on('entries.beforeDeleteEntry', [$this, 'handleEntryDelete']);
-        Craft::$app->getView()->hook('cp.entries.edit.right-pane', [
+        Craft::$app->getView()->hook('cp.entries.edit.details', [
             $this,
             'addEditEntryPagePane'
         ]);

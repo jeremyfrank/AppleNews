@@ -30,17 +30,27 @@ class Install extends Migration
     protected function createTables(): void
     {
         $this->createTable('{{%apple_news__article}}', [
-            'id' => $this->primaryKey(),
-            'entryId' => $this->integer(),
-            'channelId' => $this->string(),
+            'id' => $this->primaryKey()->notNull(),
+            'entryId' => $this->integer()->notNull(),
+            'channelId' => $this->string()->notNull(),
+            'articleId' => $this->string()->notNull(),
+            'revisionId'=> $this->string()->notNull(),
+            'isSponsored' => $this->smallInteger(1)->notNull()->unsigned(),
+            'isPreview' => $this->smallInteger(1)->notNull()->unsigned(),
+            'state'=> $this->string(),
+            'shareUrl'=> $this->string(),
+            'response' => $this->text(),
             'dateCreated' => $this->dateTime()->notNull(),
             'dateUpdated' => $this->dateTime()->notNull(),
-            'uid' => $this->uid(),
+            'uid' => $this->uid()->notNull(),
         ]);
         $this->createTable('{{%applenews_articlequeue}}', [
-            'id' => $this->primaryKey(),
+            'id' => $this->primaryKey()->notNull(),
             'entryId' => $this->integer(),
-            'channelId' => $this->string(),
+            'channelId' => $this->string()->notNull(),
+            'dateCreated' => $this->dateTime()->notNull(),
+            'dateUpdated' => $this->dateTime()->notNull(),
+            'uid' => $this->uid()->notNull(),
         ]);
     }
 
