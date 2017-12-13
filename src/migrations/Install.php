@@ -47,6 +47,7 @@ class Install extends Migration
         $this->createTable('{{%applenews_articlequeue}}', [
             'id' => $this->primaryKey()->notNull(),
             'entryId' => $this->integer(),
+            'siteId' => $this->integer()->notNull(),
             'channelId' => $this->string()->notNull(),
             'dateCreated' => $this->dateTime()->notNull(),
             'dateUpdated' => $this->dateTime()->notNull(),

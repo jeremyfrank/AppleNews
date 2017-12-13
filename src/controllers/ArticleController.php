@@ -87,7 +87,6 @@ class ArticleController extends Controller
         FileHelper::removeDirectory($zipPath);
         FileHelper::removeFile($zip);
 
-
         return $this->redirectToPostedUrl();
     }
 

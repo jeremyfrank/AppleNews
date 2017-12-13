@@ -3,6 +3,7 @@
 namespace craft\applenews\records;
 
 use craft\db\ActiveRecord;
+use Url;
 use yii\db\ActiveQueryInterface;
 use craft\elements\Entry;
 
@@ -17,7 +18,7 @@ use craft\elements\Entry;
  * @property bool                         $isSponsored       Is Sponsored
  * @property bool                         $isPreview         Is Preview
  * @property string                       $state             State
- * @property \Url                         $shareUrl          Share Url
+ * @property Url                          $shareUrl          Share Url
  * @property string                       $tableName
  * @property ActiveQueryInterface         $entry
  * @property Mixed                        $response          Response

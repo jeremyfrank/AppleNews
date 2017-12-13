@@ -9,6 +9,7 @@ use craft\applenews\records\AppleNews_Article;
 use craft\applenews\jobs\AppleNews_PostQueuedArticlesJob;
 use craft\db\Query;
 use craft\elements\Entry;
+use craft\helpers\Db;
 use yii\base\Component;
 use yii\base\Exception;
 use yii\helpers\Json;
@@ -220,7 +221,11 @@ class AppleNewsService extends Component
             foreach ($channelIds as $channelId) {
                 $row = [
                     'entryId' => $entry->id,
+                    'siteId' => $entry->siteId,
                     'channelId' => $channelId,
+                    'dateCreated' => Db::prepareDateForDb($entry->dateCreated),
+                    'dateUpdated' => Db::prepareDateForDb($entry->dateUpdated),
+                    'uid' => $entry->uid
                 ];
             }
 
@@ -466,11 +471,12 @@ class AppleNewsService extends Component
      */
     protected function getGeneratorMetadata(): array
     {
+
         if (!isset($this->_generatorMetadata)) {
             $this->_generatorMetadata = [
                 'generatorIdentifier' => 'CraftCMS',
                 'generatorName' => 'Craft CMS',
-                'generatorVersion' => Craft::$app->getPlugins()->getPlugin('src')->getVersion(),
+                'generatorVersion' => Craft::$app->getPlugins()->getPlugin('apple-news')->getVersion(),
             ];
         }
 

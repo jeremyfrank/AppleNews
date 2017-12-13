@@ -36,15 +36,15 @@ class AppleNews_PostQueuedArticlesJob extends BaseJob
 
         // Get the rows
         $rows = (new Query())
-            ->select('id, entryId, locale, channelId')
-            ->from('applenews_articlequeue')
+            ->select('id, entryId, siteId, channelId')
+            ->from('{{%applenews_articlequeue}}')
             ->limit($limit)
             ->all();
 
         // If there are any more, create a follow-up task.
         if ($limit) {
             $total = (new Query())
-                ->from('applenews_articlequeue')
+                ->from('{{%applenews_articlequeue}}')
                 ->count('id');
             if ($total > $limit) {
                 $this->getService()->createPostQueuedArticlesJob();
@@ -57,7 +57,7 @@ class AppleNews_PostQueuedArticlesJob extends BaseJob
             if (!isset($this->_stepInfo[$entryId])) {
                 $this->_stepInfo[$entryId] = [
                     'entryId' => $row['entryId'],
-                    'locale' => $row['locale'],
+                    'siteId' => $row['siteId'],
                     'channelIds' => [],
                 ];
             }
@@ -70,7 +70,7 @@ class AppleNews_PostQueuedArticlesJob extends BaseJob
         for ($step = 0; $step < $totalSteps; $step++) {
             $this->setProgress($queue, $step / $totalSteps);
             $info = array_shift($this->_stepInfo);
-            $entry = Craft::$app->getEntries()->getEntryById($info['entryId'], $info['locale']);
+            $entry = Craft::$app->getEntries()->getEntryById($info['entryId'], $info['siteId']);
 
             if ($entry) {
                 $this->getService()->postArticle($entry, $info['channelIds']);
