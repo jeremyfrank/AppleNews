@@ -366,8 +366,10 @@ class AppleNewsService extends Component
                 $this->updateArticleRecord($record, $response);
 
                 // Delete this entry+channel from the queue, if it's in there
-                Craft::$app->getDb()->createCommand()->delete('applenews_articlequeue',
-                    ['entryId' => $entry->id, 'channelId' => $channelId]);
+                Craft::$app->getDb()->createCommand()
+                    ->delete('{{%applenews_articlequeue}}',
+                    ['entryId' => $entry->id, 'channelId' => $channelId])
+                    ->execute();
             }
 
             if ($articleExists) {
@@ -471,7 +473,6 @@ class AppleNewsService extends Component
      */
     protected function getGeneratorMetadata(): array
     {
-
         if (!isset($this->_generatorMetadata)) {
             $this->_generatorMetadata = [
                 'generatorIdentifier' => 'CraftCMS',

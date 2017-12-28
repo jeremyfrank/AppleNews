@@ -68,11 +68,12 @@ class AppleNews_PostQueuedArticlesJob extends BaseJob
 
         // execute posting article
         for ($step = 0; $step < $totalSteps; $step++) {
-            $this->setProgress($queue, $step / $totalSteps);
+            $this->setProgress($queue, ($step + 1) / $totalSteps);
             $info = array_shift($this->_stepInfo);
             $entry = Craft::$app->getEntries()->getEntryById($info['entryId'], $info['siteId']);
 
             if ($entry) {
+                Craft::info("Posting entry {$info['entryId']} ({$entry->getCpEditUrl()}) to Apple News.");
                 $this->getService()->postArticle($entry, $info['channelIds']);
             }
         }

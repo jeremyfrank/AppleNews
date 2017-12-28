@@ -80,7 +80,7 @@ class ArticleController extends Controller
         }
         $archiver->close();
 
-        Craft::$app->getResponse()->sendFile($zip,$entry->slug.'.zip');
+        Craft::$app->getResponse()->sendFile($zip,$entry->title.'.zip');
         Craft::$app->getResponse()->send();
 
         FileHelper::clearDirectory($zipPath);

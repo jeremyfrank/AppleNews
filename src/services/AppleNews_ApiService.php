@@ -115,9 +115,9 @@ class AppleNews_ApiService extends Component
      * @param string $channelId
      * @param string $articleId
      *
-     * @return \stdClass
+     * @return string
      */
-    public function deleteArticle($channelId, $articleId): \stdClass
+    public function deleteArticle($channelId, $articleId): string
     {
         return $this->delete($channelId, '/articles/{article_id}', ['article_id' => $articleId]);
     }

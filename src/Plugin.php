@@ -8,6 +8,7 @@ use craft\elements\Entry;
 use Craft;
 use craft\applenews\services\AppleNewsService;
 use craft\applenews\services\AppleNews_ApiService;
+use craft\events\EntryTypeEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\helpers\UrlHelper;
 use craft\models\EntryDraft;
@@ -19,13 +20,7 @@ use craft\events\RegisterElementActionsEvent;
 use yii\helpers\Json;
 use craft\applenews\controllers\ArticleController;
 
-Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function(RegisterUrlRulesEvent $event) {
-    $event->rules['apple-news'] = ['template' => 'apple-news/index'];
-});
 
-Event::on(Entry::class, Element::EVENT_REGISTER_ACTIONS, function(RegisterElementActionsEvent $event) {
-     $event->actions[] = AppleNews_PostArticlesElementAction::class;
-});
 
 /**
  * Class AppleNewsPlugin
@@ -45,12 +40,21 @@ class Plugin extends \craft\base\Plugin
     public function init(): void
     {
         parent::init();
+        Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function(RegisterUrlRulesEvent $event) {
+            $event->rules['apple-news'] = ['template' => 'apple-news/index'];
+        });
+
+        Event::on(Entry::class, Element::EVENT_REGISTER_ACTIONS, function(RegisterElementActionsEvent $event) {
+            $event->actions[] = AppleNews_PostArticlesElementAction::class;
+        });
+
 
         if ($this->getSettings()->autoPublishOnSave) {
-            Craft::$app->on('entries.saveEntry', [$this, 'handleEntrySave']);
+            Event::on(Entry::class, Element::EVENT_AFTER_SAVE, [$this, 'handleEntrySave']);
         }
 
-        Craft::$app->on('entries.beforeDeleteEntry', [$this, 'handleEntryDelete']);
+        Event::on(Entry::class, Element::EVENT_BEFORE_DELETE, [$this, 'handleEntryDelete']);
+
         Craft::$app->getView()->hook('cp.entries.edit.details', [
             $this,
             'addEditEntryPagePane'
@@ -70,7 +74,7 @@ class Plugin extends \craft\base\Plugin
     public function handleEntrySave(Event $event): void
     {
         /** @var Entry $entry */
-        $entry = $event->params['entry'];
+        $entry = Craft::$app->getEntries()->getEntryById($event->sender['id']);
 
         // Make sure it's not a revision
         if ($entry instanceof EntryVersion || $entry instanceof EntryDraft) {
@@ -89,8 +93,7 @@ class Plugin extends \craft\base\Plugin
     public function handleEntryDelete(Event $event): void
     {
         /** @var Entry $entry */
-        $entry = $event->params['entry'];
-
+        $entry = Craft::$app->getEntries()->getEntryById($event->sender['id']);
         $this->getService()->deleteArticle($entry);
     }
 
@@ -203,7 +206,7 @@ class Plugin extends \craft\base\Plugin
 
             $downloadUrlParams = [
                 'entryId' => $entry->id,
-                'locale' => Craft::$app->getLocale(),
+                'siteId' => $entry->siteId,
                 'channelId' => $channelId,
             ];
 
@@ -321,7 +324,7 @@ EOT;
             'channels' => $channels,
             'channelNames' => $channelNames,
             'channelId' => $channelIds,
-            'sections' => $sections,
+            'sections' => $sections
         ]);
     }
 }

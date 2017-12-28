@@ -17,5 +17,5 @@ class Settings extends Model
 
     ];
     public $autoPublishOnSave = true;
-    public $limit;
+    public $limit = 5;
 }

@@ -84,7 +84,7 @@ class AppleNewsArticle implements AppleNewsArticleInterface
     {
         if ($file instanceof Asset) {
             // Get the local path to the file (and copy it from its remote source if need be)
-            $file = $file->getTransformSource();
+           $file = $file->getTransformSource();
         }
 
         // Get a unique filename for the article
