@@ -29,7 +29,7 @@ class Install extends Migration
      */
     protected function createTables(): void
     {
-        $this->createTable('{{%apple_news__article}}', [
+        $this->createTable('{{%applenews_articles}}', [
             'id' => $this->primaryKey()->notNull(),
             'entryId' => $this->integer()->notNull(),
             'channelId' => $this->string()->notNull(),
@@ -62,7 +62,7 @@ class Install extends Migration
      */
     protected function createIndexes(): void
     {
-        $this->createIndex(null, '{{%apple_news__article}}', ['entryId', 'channelId']);
+        $this->createIndex(null, '{{%applenews_article}}', ['entryId', 'channelId']);
         $this->createIndex(null, '{{%applenews_articlequeue}}', ['entryId', 'channelId'], false);
     }
 }

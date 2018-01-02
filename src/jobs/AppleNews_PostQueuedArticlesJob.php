@@ -68,7 +68,7 @@ class AppleNews_PostQueuedArticlesJob extends BaseJob
 
         // execute posting article
         for ($step = 0; $step < $totalSteps; $step++) {
-            $this->setProgress($queue, ($step + 1) / $totalSteps);
+            $this->setProgress($queue, $step / $totalSteps);
             $info = array_shift($this->_stepInfo);
             $entry = Craft::$app->getEntries()->getEntryById($info['entryId'], $info['siteId']);
 

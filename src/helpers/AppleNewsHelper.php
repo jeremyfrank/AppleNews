@@ -50,18 +50,26 @@ abstract class AppleNewsHelper
     public static function createKeywords(Entry $entry, $fieldHandles): array
     {
         $keywords = [];
+        $fields = [];
 
-        /** @var FieldLayout $fieldLayout */
-        $fieldLayout = $entry->getFieldLayout()->getFields();
-        foreach ($fieldLayout as $field) {
-            /** @var Field $field */
-            // Set the keywords for the content's site
-            $fieldValue = $entry->getFieldValue($field->handle);
-            // Add the keywords in the order defined by $fieldHandles
-            foreach ($fieldHandles as $fieldHandle) {
-                $field->handle = $fieldHandle;
+        foreach ($entry->getFieldLayout()->getFields() as $field) {
+            $fieldHandle = $field->handle;
+
+            if (in_array($fieldHandle, $fieldHandles, true)) {
+                $fields[$fieldHandle] = $field;
+            }
+        }
+
+        // Add the keywords in the order defined by $fieldHandles
+        foreach ($fieldHandles as $fieldHandle) {
+            if (isset($fields[$fieldHandle])) {
+                $field = $fields[$fieldHandle];
+
+                /** @var Field $field */
+                // Set the keywords for the content's site
+                $fieldValue = $entry->getFieldValue($field->handle);
+
                 $fieldSearchKeywords = Search::normalizeKeywords($field->getSearchKeywords($fieldValue, $entry));
-                $searchKeywordsBySiteId[$entry->siteId][$field->id] = $fieldSearchKeywords;
                 $keywords = array_merge($keywords, array_filter(preg_split('/[\s\n\r]/', $fieldSearchKeywords)));
 
                 // Out of room?
