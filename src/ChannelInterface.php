@@ -9,7 +9,7 @@ use craft\elements\Entry;
  *
  * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
  */
-interface AppleNewsChannelInterface
+interface ChannelInterface
 {
     // Public Methods
     // =========================================================================
@@ -52,7 +52,7 @@ interface AppleNewsChannelInterface
      *
      * @param Entry $entry The entry
      *
-     * @return AppleNewsArticleInterface The article that represents the entry
+     * @return ArticleInterface The article that represents the entry
      */
-    public function createArticle(Entry $entry): AppleNewsArticleInterface;
+    public function createArticle(Entry $entry): ArticleInterface;
 }

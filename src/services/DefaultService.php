@@ -3,9 +3,9 @@
 namespace craft\applenews\services;
 
 use Craft;
-use craft\applenews\AppleNewsChannelInterface;
+use craft\applenews\ChannelInterface;
 use craft\applenews\Plugin;
-use craft\applenews\records\AppleNews_Article;
+use craft\applenews\records\ApplenewsArticle;
 use craft\applenews\jobs\AppleNews_PostQueuedArticlesJob;
 use craft\db\Query;
 use craft\elements\Entry;
@@ -19,17 +19,17 @@ use yii\helpers\Json;
  *
  * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
  *
- * @property \craft\applenews\AppleNewsChannelInterface[]|array $channels
- * @property \craft\applenews\services\AppleNews_ApiService     $apiService
- * @property array                                              $generatorMetadata
+ * @property \craft\applenews\ChannelInterface[]|array $channels
+ * @property \craft\applenews\services\ApiService      $apiService
+ * @property array                                     $generatorMetadata
  */
-class AppleNewsService extends Component
+class DefaultService extends Component
 {
     // Properties
     // =========================================================================
 
     /**
-     * @var AppleNewsChannelInterface[] The channels
+     * @var ChannelInterface[] The channels
      */
     private $_channels;
 
@@ -54,7 +54,7 @@ class AppleNewsService extends Component
     /**
      * Returns all the channels.
      *
-     * @return AppleNewsChannelInterface[]
+     * @return ChannelInterface[]
      * @throws Exception if any of the channels don't implement AppleNewsChannelInterface.
      */
     public function getChannels(): array
@@ -66,7 +66,7 @@ class AppleNewsService extends Component
             foreach ($channelConfigs as $config) {
                 $channel = Craft::createObject($config);
 
-                if (!($channel instanceof AppleNewsChannelInterface)) {
+                if (!($channel instanceof ChannelInterface)) {
                     throw new Exception('All Apple News channels must implement the AppleNewsChannelInterface interface');
                 }
 
@@ -82,10 +82,10 @@ class AppleNewsService extends Component
      *
      * @param string $channelId The channel ID
      *
-     * @return AppleNewsChannelInterface
+     * @return ChannelInterface
      * @throws Exception if no channel exists with that ID
      */
-    public function getChannelById($channelId): AppleNewsChannelInterface
+    public function getChannelById($channelId): ChannelInterface
     {
         $channels = $this->getChannels();
 
@@ -133,7 +133,7 @@ class AppleNewsService extends Component
         if ($channelId !== null) {
             $attributes['channelId'] = $channelId;
         }
-        $records = AppleNews_Article::findAll($attributes);
+        $records = ApplenewsArticle::findAll($attributes);
 
         $infos = [];
 
@@ -300,7 +300,7 @@ class AppleNewsService extends Component
             $channelId = [$channelId];
         }
 
-        /** @var AppleNewsChannelInterface[] $channels */
+        /** @var ChannelInterface[] $channels */
         $channels = [];
 
         foreach ($this->getChannels() as $channel) {
@@ -358,7 +358,7 @@ class AppleNewsService extends Component
                 if ($articleExists) {
                     $record = $articleRecords[$channelId];
                 } else {
-                    $record = new AppleNews_Article();
+                    $record = new ApplenewsArticle();
                     $record->entryId = $entry->id;
                     $record->channelId = $channelId;
                     $record->articleId = $response->data->id;
@@ -403,9 +403,9 @@ class AppleNewsService extends Component
     /**
      * Returns the API service.
      *
-     * @return AppleNews_ApiService
+     * @return ApiService
      */
-    protected function getApiService(): AppleNews_ApiService
+    protected function getApiService(): ApiService
     {
         return Plugin::getInstance()->appleNewsApiService;
     }
@@ -416,11 +416,11 @@ class AppleNewsService extends Component
      *
      * @param Entry $entry
      *
-     * @return AppleNews_Article[]
+     * @return ApplenewsArticle[]
      */
     protected function getArticleRecordsForEntry(Entry $entry): array
     {
-        $records = AppleNews_Article::findAll([
+        $records = ApplenewsArticle::findAll([
             'entryId' => $entry->id
         ]);
 
@@ -437,7 +437,7 @@ class AppleNewsService extends Component
     /**
      * Deletes articles on Apple News based on the given records.
      *
-     * @param AppleNews_Article[] $records The article records
+     * @param ApplenewsArticle[] $records The article records
      *
      * @return void
      */
@@ -453,10 +453,10 @@ class AppleNewsService extends Component
     /**
      * Updates a given Article record with the data in an Apple News API response.
      *
-     * @param AppleNews_Article $record
-     * @param \stdClass         $response
+     * @param ApplenewsArticle $record
+     * @param \stdClass        $response
      */
-    protected function updateArticleRecord(AppleNews_Article $record, $response)
+    protected function updateArticleRecord(ApplenewsArticle $record, $response)
     {
         $record->revisionId = $response->data->revision;
         $record->isSponsored = $response->data->isSponsored;

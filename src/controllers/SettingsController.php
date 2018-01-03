@@ -3,8 +3,8 @@
 namespace craft\applenews\controllers;
 
 use craft\applenews\Plugin;
-use craft\applenews\services\AppleNews_ApiService;
-use craft\applenews\services\AppleNewsService;
+use craft\applenews\services\ApiService;
+use craft\applenews\services\DefaultService;
 use craft\elements\Entry;
 use craft\web\Controller;
 use Craft;
@@ -56,17 +56,17 @@ class SettingsController extends Controller
     }
 
     /**
-     * @return AppleNewsService
+     * @return DefaultService
      */
-    protected function getService(): AppleNewsService
+    protected function getService(): DefaultService
     {
         return Plugin::getInstance()->appleNewsService;
     }
 
     /**
-     * @return AppleNews_ApiService
+     * @return ApiService
      */
-    protected function getApiService(): AppleNews_ApiService
+    protected function getApiService(): ApiService
     {
         return Plugin::getInstance()->appleNewsApiService;
     }

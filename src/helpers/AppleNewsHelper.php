@@ -2,12 +2,10 @@
 
 namespace craft\applenews\helpers;
 
-use Craft;
 use craft\base\Field;
 use craft\elements\Entry;
-use craft\fields\data\RichTextData;
-use craft\models\FieldLayout;
 use craft\helpers\Search;
+use craft\redactor\assets\redactor\RedactorAsset;
 use League\HTMLToMarkdown\HtmlConverter;
 use yii\helpers\Markdown;
 
@@ -16,7 +14,7 @@ use yii\helpers\Markdown;
  *
  * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
  */
-abstract class AppleNewsHelper
+abstract class ApplenewsHelper
 {
     // Properties
     // =========================================================================
@@ -86,13 +84,13 @@ abstract class AppleNewsHelper
     /**
      * Strips HTML tags from a given string, returning just the text. Block-level tags will be joined by two newlines.
      *
-     * @param string|RichTextData $html HTML-formatted text, or a RichTextData object
+     * @param string|RedactorAsset $html HTML-formatted text, or a RedactorAsset object
      *
      * @return string Text without HTML tags
      */
     public static function stripHtml($html): string
     {
-        if ($html instanceof RichTextData) {
+        if ($html instanceof RedactorAsset) {
             $html = $html->getParsedContent();
         }
 
@@ -117,13 +115,13 @@ abstract class AppleNewsHelper
     /**
      * Converts HTML-formatted text into Markdown, stripped of any tags that aren’t supported by Apple News Format.
      *
-     * @param string|RichTextData $html HTML-formatted text, or a RichTextData object
+     * @param string|RedactorAsset $html HTML-formatted text, or a RedactorAsset object
      *
      * @return string Markdown-formatted text
      */
     public static function html2Markdown($html): string
     {
-        if ($html instanceof RichTextData) {
+        if ($html instanceof RedactorAsset) {
             $html = $html->getParsedContent();
         }
 
@@ -147,7 +145,7 @@ abstract class AppleNewsHelper
      * - <h1-6> => role=heading1-6 with either `heading1-6` or `heading` properties
      * - everything else => role=body with `body` properties
      *
-     * @param string|RichTextData $html       HTML-formatted text, or a RichTextData object
+     * @param string|RedactorAsset $html       HTML-formatted text, or a RedactorAsset object
      * @param array|callable      $properties An array defining the component properties that should be applied to each component type,
      *                                        or a function that returns the full component definition, given the type and Markdown text.
      *
@@ -156,7 +154,7 @@ abstract class AppleNewsHelper
      */
     public static function html2Components($html, $properties = []): array
     {
-        if ($html instanceof RichTextData) {
+        if ($html instanceof RedactorAsset) {
             $html = $html->getParsedContent();
         }
 

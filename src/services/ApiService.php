@@ -12,9 +12,9 @@ use yii\base\Component;
  *
  * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
  *
- * @property \craft\applenews\services\AppleNewsService $service
+ * @property \craft\applenews\services\DefaultService $service
  */
-class AppleNews_ApiService extends Component
+class ApiService extends Component
 {
     // Public Methods
     // =========================================================================
@@ -197,9 +197,9 @@ class AppleNews_ApiService extends Component
     /**
      * Returns the AppleNewsService instance
      *
-     * @return AppleNewsService
+     * @return DefaultService
      */
-    protected function getService(): AppleNewsService
+    protected function getService(): DefaultService
     {
         return Plugin::getInstance()->appleNewsService;
     }

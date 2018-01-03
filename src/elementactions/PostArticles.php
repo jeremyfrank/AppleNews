@@ -6,7 +6,7 @@ use craft\base\ElementAction;
 use craft\elements\db\ElementQuery;
 use craft\elements\db\ElementQueryInterface;
 use craft\elements\Entry;
-use craft\applenews\services\AppleNewsService;
+use craft\applenews\services\DefaultService;
 
 /**
  * Class AppleNews_PostArticlesElementAction
@@ -15,7 +15,7 @@ use craft\applenews\services\AppleNewsService;
  *
  * @property string $triggerLabel
  */
-class AppleNews_PostArticlesElementAction extends ElementAction
+class PostArticles extends ElementAction
 {
     // Public Methods
     // =========================================================================
@@ -39,7 +39,7 @@ class AppleNews_PostArticlesElementAction extends ElementAction
      */
     public function performAction(ElementQueryInterface $criteria): bool
     {
-        /** @var AppleNewsService $service */
+        /** @var DefaultService $service */
         $service = Plugin::getInstance()->appleNewsService;
 
         // Queue them up

@@ -26,7 +26,7 @@ use craft\elements\Entry;
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since  3.0
  */
-class AppleNews_Article extends ActiveRecord
+class ApplenewsArticle extends ActiveRecord
 {
     // Public Methods
     // =========================================================================
@@ -38,7 +38,7 @@ class AppleNews_Article extends ActiveRecord
      */
     public function getTableName(): string
     {
-        return '{{%apple_news_article}}';
+        return '{{%applenews_article}}';
     }
 
     /**

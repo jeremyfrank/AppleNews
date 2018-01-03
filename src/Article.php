@@ -10,7 +10,7 @@ use craft\elements\Entry;
  *
  * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
  */
-class AppleNewsArticle implements AppleNewsArticleInterface
+class Article implements ArticleInterface
 {
     // Properties
     // =========================================================================

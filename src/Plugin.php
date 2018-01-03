@@ -2,12 +2,12 @@
 
 namespace craft\applenews;
 
-use craft\applenews\elementactions\AppleNews_PostArticlesElementAction;
+use craft\applenews\elementactions\PostArticles;
 use craft\base\Element;
 use craft\elements\Entry;
 use Craft;
-use craft\applenews\services\AppleNewsService;
-use craft\applenews\services\AppleNews_ApiService;
+use craft\applenews\services\DefaultService;
+use craft\applenews\services\ApiService;
 use craft\events\EntryTypeEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\helpers\UrlHelper;
@@ -20,14 +20,12 @@ use craft\events\RegisterElementActionsEvent;
 use yii\helpers\Json;
 use craft\applenews\controllers\ArticleController;
 
-
-
 /**
  * Class AppleNewsPlugin
  *
  * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
  *
- * @property AppleNewsService $service
+ * @property DefaultService $service
  */
 class Plugin extends \craft\base\Plugin
 {
@@ -45,9 +43,8 @@ class Plugin extends \craft\base\Plugin
         });
 
         Event::on(Entry::class, Element::EVENT_REGISTER_ACTIONS, function(RegisterElementActionsEvent $event) {
-            $event->actions[] = AppleNews_PostArticlesElementAction::class;
+            $event->actions[] = PostArticles::class;
         });
-
 
         if ($this->getSettings()->autoPublishOnSave) {
             Event::on(Entry::class, Element::EVENT_AFTER_SAVE, [$this, 'handleEntrySave']);
@@ -61,8 +58,8 @@ class Plugin extends \craft\base\Plugin
         ]);
 
         $this->setComponents([
-            'appleNewsService' => AppleNewsService::class,
-            'appleNewsApiService' => AppleNews_ApiService::class
+            'appleNewsService' => DefaultService::class,
+            'appleNewsApiService' => ApiService::class
         ]);
     }
 
@@ -112,7 +109,7 @@ class Plugin extends \craft\base\Plugin
         }
 
         // Find any channels that match this entry
-        /** @var AppleNewsChannelInterface[] $channels */
+        /** @var ChannelInterface[] $channels */
         $channels = [];
         foreach ($this->getService()->getChannels() as $channel) {
             if ($channel->matchEntry($entry)) {
@@ -284,9 +281,9 @@ EOT;
     // =========================================================================
 
     /**
-     * @return AppleNewsService
+     * @return DefaultService
      */
-    protected function getService(): AppleNewsService
+    protected function getService(): DefaultService
     {
         return self::getInstance()->appleNewsService;
     }

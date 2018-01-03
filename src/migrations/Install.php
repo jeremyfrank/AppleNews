@@ -29,7 +29,7 @@ class Install extends Migration
      */
     protected function createTables(): void
     {
-        $this->createTable('{{%applenews_articles}}', [
+        $this->createTable('{{%applenews_article}}', [
             'id' => $this->primaryKey()->notNull(),
             'entryId' => $this->integer()->notNull(),
             'channelId' => $this->string()->notNull(),

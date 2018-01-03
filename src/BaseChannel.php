@@ -10,7 +10,7 @@ use yii\base\Exception;
  *
  * @license https://github.com/pixelandtonic/AppleNews/blob/master/LICENSE
  */
-abstract class BaseAppleNewsChannel implements AppleNewsChannelInterface
+abstract class BaseChannel implements ChannelInterface
 {
     // Properties
     // =========================================================================
@@ -80,7 +80,7 @@ abstract class BaseAppleNewsChannel implements AppleNewsChannelInterface
     /**
      * @inheritdoc
      */
-    public function createArticle(Entry $entry): AppleNewsArticleInterface
+    public function createArticle(Entry $entry): ArticleInterface
     {
         throw new Exception('createArticle not implemented');
     }

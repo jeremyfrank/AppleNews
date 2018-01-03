@@ -4,7 +4,7 @@ namespace craft\applenews\jobs;
 
 use Craft;
 use craft\applenews\Plugin;
-use craft\applenews\services\AppleNewsService;
+use craft\applenews\services\DefaultService;
 use craft\db\Query;
 use craft\queue\BaseJob;
 
@@ -50,6 +50,7 @@ class AppleNews_PostQueuedArticlesJob extends BaseJob
                 $this->getService()->createPostQueuedArticlesJob();
             }
         }
+
         $this->_stepInfo = [];
 
         foreach ($rows as $row) {
@@ -93,9 +94,9 @@ class AppleNews_PostQueuedArticlesJob extends BaseJob
     }
 
     /**
-     * @return AppleNewsService
+     * @return DefaultService
      */
-    protected function getService(): AppleNewsService
+    protected function getService(): DefaultService
     {
         return Plugin::getInstance()->appleNewsService;
     }

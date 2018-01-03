@@ -6,7 +6,7 @@ use Composer\Package\Archiver\ZipArchiver;
 use Craft;
 use craft\applenews\Plugin;
 use craft\elements\Entry;
-use craft\applenews\services\AppleNewsService;
+use craft\applenews\services\DefaultService;
 use craft\helpers\FileHelper;
 use craft\helpers\StringHelper;
 use craft\web\Controller;
@@ -36,7 +36,6 @@ class ArticleController extends Controller
         $channelId = Craft::$app->getRequest()->getRequiredParam('channelId');
         $channel = $this->getService()->getChannelById($channelId);
 
-
         if (!$channel->matchEntry($entry)) {
             throw new Exception('This channel does not want anything to do with this entry.');
         }
@@ -48,16 +47,13 @@ class ArticleController extends Controller
 
         $zipContentDir = $zipPath.'/'.$entry->slug;
 
-       // FileHelper::createDirectory($zipPath);
-       // FileHelper::createDirectory($zipContentDir);
-
         // Create article.json
         $json = Json::encode($article->getContent());
         FileHelper::writeToFile($zipContentDir.'/article.json', $json);
 
         $archiver = new ZipArchive();
         $zip = $zipPath.'.zip';
-        $open = $archiver->open($zip, ZipArchive::CREATE);
+        $archiver->open($zip, ZipArchive::CREATE);
 
 
         $files = new RecursiveIteratorIterator(
@@ -97,7 +93,6 @@ class ArticleController extends Controller
     {
         $entry = $this->getEntry(true);
         $channelId = Craft::$app->getRequest()->getParam('channelId');
-
 
         return $this->asJson([
             'infos' => $this->getArticleInfo($entry, $channelId, true),
@@ -185,9 +180,9 @@ class ArticleController extends Controller
     }
 
     /**
-     * @return AppleNewsService
+     * @return DefaultService
      */
-    protected function getService(): AppleNewsService
+    protected function getService(): DefaultService
     {
         return Plugin::getInstance()->appleNewsService;
     }
