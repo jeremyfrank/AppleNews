@@ -1,6 +1,6 @@
 <?php
-namespace craft\applenews;
 
+namespace craft\applenews;
 
 use craft\elements\Entry;
 

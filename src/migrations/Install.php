@@ -1,4 +1,5 @@
 <?php
+
 namespace craft\applenews\migrations;
 
 use craft\db\Migration;
@@ -34,11 +35,11 @@ class Install extends Migration
             'entryId' => $this->integer()->notNull(),
             'channelId' => $this->string()->notNull(),
             'articleId' => $this->string()->notNull(),
-            'revisionId'=> $this->string()->notNull(),
+            'revisionId' => $this->string()->notNull(),
             'isSponsored' => $this->smallInteger(1)->notNull()->unsigned(),
             'isPreview' => $this->smallInteger(1)->notNull()->unsigned(),
-            'state'=> $this->string(),
-            'shareUrl'=> $this->string(),
+            'state' => $this->string(),
+            'shareUrl' => $this->string(),
             'response' => $this->text(),
             'dateCreated' => $this->dateTime()->notNull(),
             'dateUpdated' => $this->dateTime()->notNull(),

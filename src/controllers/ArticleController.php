@@ -2,7 +2,6 @@
 
 namespace craft\applenews\controllers;
 
-use Composer\Package\Archiver\ZipArchiver;
 use Craft;
 use craft\applenews\Plugin;
 use craft\elements\Entry;
@@ -61,11 +60,9 @@ class ArticleController extends Controller
             RecursiveIteratorIterator::LEAVES_ONLY
         );
 
-        foreach ($files as $name => $file)
-        {
+        foreach ($files as $name => $file) {
             // Skip directories (they would be added automatically)
-            if (!$file->isDir())
-            {
+            if (!$file->isDir()) {
                 // Get real and relative path for current file
                 $filePath = $file->getRealPath();
                 $relativePath = substr($filePath, strlen($zipPath) + 1);
@@ -76,7 +73,7 @@ class ArticleController extends Controller
         }
         $archiver->close();
 
-        Craft::$app->getResponse()->sendFile($zip,$entry->title.'.zip');
+        Craft::$app->getResponse()->sendFile($zip, $entry->title.'.zip');
         Craft::$app->getResponse()->send();
 
         FileHelper::clearDirectory($zipPath);

@@ -1,11 +1,10 @@
 <?php
+
 namespace craft\applenews\services;
 
 use ChapterThree\AppleNewsAPI\PublisherAPI;
-use Craft;
 use craft\applenews\Plugin;
 use yii\base\Component;
-
 
 /**
  * Class AppleNews_ApiService

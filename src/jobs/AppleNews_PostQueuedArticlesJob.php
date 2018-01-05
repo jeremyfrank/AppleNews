@@ -100,5 +100,4 @@ class AppleNews_PostQueuedArticlesJob extends BaseJob
     {
         return Plugin::getInstance()->appleNewsService;
     }
-
 }

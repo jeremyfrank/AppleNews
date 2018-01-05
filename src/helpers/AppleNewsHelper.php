@@ -146,8 +146,8 @@ abstract class ApplenewsHelper
      * - everything else => role=body with `body` properties
      *
      * @param string|RedactorAsset $html       HTML-formatted text, or a RedactorAsset object
-     * @param array|callable      $properties An array defining the component properties that should be applied to each component type,
-     *                                        or a function that returns the full component definition, given the type and Markdown text.
+     * @param array|callable       $properties An array defining the component properties that should be applied to each component type,
+     *                                         or a function that returns the full component definition, given the type and Markdown text.
      *
      * @return array Component definitions
      * @todo Add support for images + captions and videos

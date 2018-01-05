@@ -178,7 +178,7 @@ class DefaultService extends Component
     /**
      * Returns whether any channels can publish the given entry.
      *
-     * @param Entry                $entry
+     * @param Entry $entry
      *
      * @return bool Whether the entry can be published to any channels
      */
@@ -245,7 +245,6 @@ class DefaultService extends Component
 
         return false;
     }
-
 
     /**
      * Creates a new PostQueuedArticles job if there isn't already one pending
@@ -368,7 +367,7 @@ class DefaultService extends Component
                 // Delete this entry+channel from the queue, if it's in there
                 Craft::$app->getDb()->createCommand()
                     ->delete('{{%applenews_articlequeue}}',
-                    ['entryId' => $entry->id, 'channelId' => $channelId])
+                        ['entryId' => $entry->id, 'channelId' => $channelId])
                     ->execute();
             }
 

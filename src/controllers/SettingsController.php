@@ -5,12 +5,7 @@ namespace craft\applenews\controllers;
 use craft\applenews\Plugin;
 use craft\applenews\services\ApiService;
 use craft\applenews\services\DefaultService;
-use craft\elements\Entry;
 use craft\web\Controller;
-use Craft;
-use yii\base\Exception;
-use yii\web\HttpException;
-
 
 /**
  * Class SettingsController

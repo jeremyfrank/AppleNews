@@ -1,8 +1,8 @@
 <?php
+
 namespace craft\applenews;
 
 use craft\elements\Asset;
-
 
 /**
  * Interface IAppleNewsArticle

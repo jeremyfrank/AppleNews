@@ -8,7 +8,6 @@ use craft\elements\Entry;
 use Craft;
 use craft\applenews\services\DefaultService;
 use craft\applenews\services\ApiService;
-use craft\events\EntryTypeEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\helpers\UrlHelper;
 use craft\models\EntryDraft;

@@ -9,10 +9,10 @@ use craft\elements\Entry;
 /**
  * Class AppleNews_ArticleQueueRecord record.
  *
- * @property \Locale                      $locale       Locale
- * @property string                       $channelId    Channel ID
- * @property ActiveQueryInterface         $entry
- * @property int                          $entryId      Entry ID
+ * @property \Locale              $locale       Locale
+ * @property string               $channelId    Channel ID
+ * @property ActiveQueryInterface $entry
+ * @property int                  $entryId      Entry ID
  *
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since  3.0
@@ -39,7 +39,7 @@ class ApplenewsArticleQueue extends ActiveRecord
      */
     public function getEntry(): ActiveQueryInterface
     {
-        return $this->hasOne(Entry::class,['id' => 'entryId']);
+        return $this->hasOne(Entry::class, ['id' => 'entryId']);
     }
 
     /**
